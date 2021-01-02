@@ -547,38 +547,38 @@ div.sheet-tab-content {
     padding: 5px;
 }
 
-.sheet-attributes-orbslot1{
+/* .sheet-attributes-orbslot1{
     margin-top:20px;
-}
+} */
 
 input[name="attr_tech_isarts"][value="1"]+.sheet-tech {
     background-color: cyan;
 }
 
-input[value="none-quartz"]+div {
+/* input[value="none-quartz"]+div {
     height:35px;
     width:35px;
 }
 
 input[value="fire-quartz"]+div {
-    background-image: url(https://static.wikia.nocookie.net/kiseki/images/2/21/Fire_%28Sen_Quartz%29.png/revision/latest/scale-to-width-down/32?cb=20161017044752);
+    background-image: url(https://raw.githubusercontent.com/AzureTangent/TrailsValor/main/.github/images/Fire_Quartz.png?token=ASKJFQNX4FGF6L2AJQPE57S755JMY);
     height:35px;
     width:35px;
 }
 
 
 input[value="time-quartz"]+div {
-    background-image:url(https://static.wikia.nocookie.net/kiseki/images/b/be/Time_%28Sen_Quartz%29.png/revision/latest/scale-to-width-down/32?cb=20161017050833);
+    background-image:url(https://raw.githubusercontent.com/AzureTangent/TrailsValor/main/.github/images/Time_Quartz.png?token=ASKJFQILZ2Y4FE22D7MYEIK755JUM);
     height: 35px;
     width: 35px;
 }
 
 input[value="water-quartz"]+div {
-    background-image: url(https://static.wikia.nocookie.net/kiseki/images/e/e0/Water_%28Sen_Quartz%29.png/revision/latest/scale-to-width-down/32?cb=20161017044751);
+    background-image: url(https://github.com/AzureTangent/TrailsValor/blob/main/.github/images/Water_Quartz.png?raw=true);
     height:35px;
     width:35px;
-}
-
+} */
+/*
 input[value="earth-quartz"]+div {
     background-image: url(https://static.wikia.nocookie.net/kiseki/images/e/e0/Water_%28Sen_Quartz%29.png/revision/latest/scale-to-width-down/32?cb=20161017044751);
     height:35px;
@@ -601,4 +601,4 @@ input[value="mirage-quartz"]+div {
     background-image: url(https://static.wikia.nocookie.net/kiseki/images/b/bd/Mirage_%28Sen_Quartz%29.png/revision/latest/scale-to-width-down/32?cb=20161017050835);
     height:35px;
     width:35px;
-}
+} */

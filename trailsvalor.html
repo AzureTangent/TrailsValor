@@ -278,25 +278,40 @@
     ];
 
     let quartzLibrary = [
-        { value: 1, element: 'time', summary: 'Action 1: Increases Initiative by 1', id: 'action1' },
-        { value: 2, element: 'time', summary: 'Action 2: Initiative by 2', id: 'action2' },
-        { value: 6, element: 'fire', summary: 'Attack 1: Increases Physical Attack by 6', id: 'attack1' },
-        { value: 6, element: 'earth', summary: 'Defense 1: Increases Defense by 6', id: 'defense1' },
-        { value: 6, element: 'water', summary: 'Shield 1: Increases Resistance by 6', id: 'shield1' },
-        { value: 1, element: 'wind' , summary: 'Evade 1: Increases defense rolls by 1', id: 'evade1' },
-        { value: 1, element: 'space', summary: 'Hit 1: Increases attack rolls by 1', id: 'hit1' },
-        { value: 30, element: 'water', summary: 'HP 1: Increases Max HP by 30', id: 'hp1' },
-        { value: 6, element: 'mirage', summary: 'Mind 1: Increases Energy Attack by 6', id: 'mind1' },
-        { value: 10, element: 'mirage', summary: 'EP 1: Increases Stamina by 10', id: 'ep1' },
-        {value: 1, element: 'water', summary: 'Tear: Grants access to the Art Tear', id:'tear'},
-        {value: 2, element: 'water', summary: 'Aqua Bleed: Grants access to the Art Aqua Bleed', id: 'aquableed' }
+        {type: 'empty', value: 0, element: 'none', summary: ' - Empty - ', id: 'none' },
+        {type: 'stat', value: 1, element: 'time', summary: 'Action 1: Increases Initiative by 1', id: 'action1' },
+        {type: 'stat', value: 2, element: 'time', summary: 'Action 2: Initiative by 2', id: 'action2' },
+        {type: 'stat', value: 6, element: 'fire', summary: 'Attack 1: Increases Physical Attack by 6', id: 'attack1' },
+        {type: 'stat', value: 6, element: 'earth', summary: 'Defense 1: Increases Defense by 6', id: 'defense1' },
+        {type: 'stat', value: 6, element: 'water', summary: 'Shield 1: Increases Resistance by 6', id: 'shield1' },
+        {type: 'stat', value: 1, element: 'wind' , summary: 'Evade 1: Increases defense rolls by 1', id: 'evade1' },
+        {type: 'stat', value: 1, element: 'wind' , summary: 'Move 1: Increases move distance by 1', id: 'move1' },
+        {type: 'stat', value: 1, element: 'space', summary: 'Hit 1: Increases attack rolls by 1', id: 'hit1' },
+        {type: 'stat', value: 30, element: 'water', summary: 'HP 1: Increases Max HP by 30', id: 'hp1' },
+        {type: 'stat', value: 6, element: 'mirage', summary: 'Mind 1: Increases Energy Attack by 6', id: 'mind1' },
+        {type: 'stat', value: 10, element: 'mirage', summary: 'EP 1: Increases Stamina by 10', id: 'ep1' },
+        {type: 'tech', value: 1, element: 'water', summary: 'Tear: Grants access to the Art Tear', id:'tear'},
+        {type: 'tech', value: 2, element: 'water', summary: 'Aqua Bleed: Grants access to the Art Aqua Bleed', id: 'aquableed' },
+        {type: 'tech', value: 3, element: 'time', summary: 'Clock Up: Grants access to the Art Clock Up', id: 'clockup' }
     ];
+
+    let artsLibrary = [
+        {id: 'aquableed', name: 'Aqua Bleed', description: 'Aqua Bleed is a water-elemental Orbal Art', stat:'spr',core:'damage',coreLevel:'2',mods:'Ranged Attack 2\nPiercing Attack', limits:'', skills: '', flaws:''},
+        {id: 'tear', name: 'Tear', description: 'Tear is a basic water-elemental healing Orbal Art', stat:'spr',core:'healing',coreLevel:'4',mods:'Ranged Attack 2', limits:'Set up limit', skills: '', flaws:''},
+        {id: 'clockup', name: 'Clock Up', description: 'Clock Up is a time-elemental boosting Orbal Art', stat:'agi',core:'boost',coreLevel:'4',mods:'Ranged Attack 2', limits:'Set up limit', skills: 'Sprinter', flaws:''}
+    ];
+
+    const QUARTZSLOTS = 5; //number of orbment slots to fill
 
     let quartzImageLibrary = [
         {id: 'none', image: ''},
         {id: 'time', image: 'time-quartz'},
+        {id: 'space', image: 'space-quartz'},
+        {id: 'mirage', image: 'mirage-quartz'},
         {id: 'water', image: 'water-quartz'},
-        {id: 'fire', image: 'fire-quartz'}
+        {id: 'fire', image: 'fire-quartz'},
+        {id: 'wind', image: 'wind-quartz'},
+        {id: 'earth', image: 'earth-quartz'}
     ];
 
     function getQuartz(name){
@@ -306,6 +321,12 @@
     }
     function getQuartzImage(name){
         return quartzImageLibrary.find(function(q) {
+            return q.id == name;
+        });
+    }
+
+    function getQuartzTech(name){
+        return artsLibrary.find(function(q) {
             return q.id == name;
         });
     }
@@ -508,72 +529,102 @@
 
     function calculateAttack() {
         log('VALOR - Recalculating Attack');
-        getAttrs(['level', 'str', 'agi', 'spr', 'mnd', 'gut', 'type'], function(values) {
-            let level = parseInt(values.level);
-            let str = parseInt(values.str);
-            let agi = parseInt(values.agi);
-            let spr = parseInt(values.spr);
-            let mnd = parseInt(values.mnd);
-            let gut = parseInt(values.gut);
-
-            let strAtk = (level + str) * 2;
-            let agiAtk = (level + agi) * 2;
-            let sprAtk = (level + spr) * 2;
-            let mndAtk = (level + mnd) * 2;
-
-            // Apply Skills
-            let skillFieldNames = [];
-            getSectionIDs('repeating_skills', function(sidarray) {
-                for(let i = 0; i < sidarray.length; i++) {
-                    skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                    skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbPhysValue = 0;
+            let orbEngValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("attack"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbPhysValue += quartz.value;
                 }
-                getAttrs(skillFieldNames, function(skillValues) {
+
+                if(orbId.startsWith("mind"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbEngValue += quartz.value;
+                }
+            });
+            getAttrs(['level', 'str', 'agi', 'spr', 'mnd', 'gut', 'type'], function(values) {
+                let level = parseInt(values.level);
+                let str = parseInt(values.str);
+                let agi = parseInt(values.agi);
+                let spr = parseInt(values.spr);
+                let mnd = parseInt(values.mnd);
+                let gut = parseInt(values.gut);
+
+                let strAtk = (level + str) * 2;
+                let agiAtk = (level + agi) * 2;
+                let sprAtk = (level + spr) * 2;
+                let mndAtk = (level + mnd) * 2;
+
+                // Apply Skills
+                let skillFieldNames = [];
+                getSectionIDs('repeating_skills', function(sidarray) {
                     for(let i = 0; i < sidarray.length; i++) {
-                        let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                        if(!skillName) {
-                            skillName = 'customSkill';
-                        }
-                        let skillLevel = 1;
-                        if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
-                            skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
-                        }
-
-                        switch(skillName) {
-                            case 'energyAttacker':
-                                sprAtk += 3 + 3 * skillLevel;
-                                mndAtk += 3 + 3 * skillLevel;
-                                break;
-                            case 'physicalAttacker':
-                                strAtk += 3 + 3 * skillLevel;
-                                agiAtk += 3 + 3 * skillLevel;
-                                break;
-                        }
+                        skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                        skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
                     }
+                    getAttrs(skillFieldNames, function(skillValues) {
+                        for(let i = 0; i < sidarray.length; i++) {
+                            let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                            if(!skillName) {
+                                skillName = 'customSkill';
+                            }
+                            let skillLevel = 1;
+                            if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
+                                skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
+                            }
 
-                    switch(values.type) {
-                        case 'flunky':
-                        case 'soldier':
-                        case 'swarm':
-                            strAtk = Math.ceil(strAtk / 2);
-                            agiAtk = Math.ceil(agiAtk / 2);
-                            sprAtk = Math.ceil(sprAtk / 2);
-                            mndAtk = Math.ceil(mndAtk / 2);
-                            break;
-                        case 'master':
-                            strAtk += str;
-                            agiAtk += agi;
-                            sprAtk += spr;
-                            mndAtk += mnd;
-                            break;
-                    }
+                            switch(skillName) {
+                                case 'energyAttacker':
+                                    sprAtk += 3 + 3 * skillLevel;
+                                    mndAtk += 3 + 3 * skillLevel;
+                                    break;
+                                case 'physicalAttacker':
+                                    strAtk += 3 + 3 * skillLevel;
+                                    agiAtk += 3 + 3 * skillLevel;
+                                    break;
+                            }
+                        }
 
-                    // Set values
-                    setAttrs({
-                        strAtk: strAtk,
-                        agiAtk: agiAtk,
-                        sprAtk: sprAtk,
-                        mndAtk: mndAtk
+                        switch(values.type) {
+                            case 'flunky':
+                            case 'soldier':
+                            case 'swarm':
+                                strAtk = Math.ceil(strAtk / 2);
+                                agiAtk = Math.ceil(agiAtk / 2);
+                                sprAtk = Math.ceil(sprAtk / 2);
+                                mndAtk = Math.ceil(mndAtk / 2);
+                                break;
+                            case 'master':
+                                strAtk += str;
+                                agiAtk += agi;
+                                sprAtk += spr;
+                                mndAtk += mnd;
+                                break;
+                        }
+
+                        //add orbment values
+                        strAtk += orbPhysValue;
+                        agiAtk += orbPhysValue;
+                        sprAtk += orbEngValue;
+                        mndAtk += orbEngValue;
+
+                        // Set values
+                        setAttrs({
+                            strAtk: strAtk,
+                            agiAtk: agiAtk,
+                            sprAtk: sprAtk,
+                            mndAtk: mndAtk
+                        });
                     });
                 });
             });
@@ -582,84 +633,104 @@
 
     function calculateHealth() {
         log('VALOR - Recalculating Max Health');
-        getAttrs(['level', 'str', 'gut', 'type'], function(values) {
-            let level = parseInt(values.level);
-            let str = parseInt(values.str);
-            let gut = parseInt(values.gut);
-
-            let hp = 50 + 10 * level + 10 * gut + 5 * str;
-
-            // Apply Flaws
-            let flawFieldNames = [];
-            getSectionIDs('repeating_flaws', function(idarray) {
-                for(let i = 0; i < idarray.length; i++) {
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("hp"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbValue += quartz.value;
                 }
-                getAttrs(flawFieldNames, function(flawValues) {
+            });
+            getAttrs(['level', 'str', 'gut', 'type'], function(values) {
+                let level = parseInt(values.level);
+                let str = parseInt(values.str);
+                let gut = parseInt(values.gut);
+
+                let hp = 50 + 10 * level + 10 * gut + 5 * str;
+
+                // Apply Flaws
+                let flawFieldNames = [];
+                getSectionIDs('repeating_flaws', function(idarray) {
                     for(let i = 0; i < idarray.length; i++) {
-                        let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
-                        if(!flawName) {
-                            flawName = 'customFlaw';
-                        }
-                        let flawLevel = 1;
-                        if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
-                            flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
-                        }
-
-                        // Apply effects
-                        switch(flawName) {
-                            case 'fragile':
-                                hp -= 15 + 15 * flawLevel;
-                                break;
-                        }
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
                     }
+                    getAttrs(flawFieldNames, function(flawValues) {
+                        for(let i = 0; i < idarray.length; i++) {
+                            let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
+                            if(!flawName) {
+                                flawName = 'customFlaw';
+                            }
+                            let flawLevel = 1;
+                            if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
+                                flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
+                            }
 
-                    // Apply Skills
-                    let skillFieldNames = [];
-                    getSectionIDs('repeating_skills', function(sidarray) {
-                        for(let i = 0; i < sidarray.length; i++) {
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                            // Apply effects
+                            switch(flawName) {
+                                case 'fragile':
+                                    hp -= 15 + 15 * flawLevel;
+                                    break;
+                            }
                         }
-                        getAttrs(skillFieldNames, function(skillValues) {
+
+                        // Apply Skills
+                        let skillFieldNames = [];
+                        getSectionIDs('repeating_skills', function(sidarray) {
                             for(let i = 0; i < sidarray.length; i++) {
-                                let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                                if(!skillName) {
-                                    skillName = 'customSkill';
-                                }
-                                let skillLevel = 1;
-                                if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
-                                    skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
-                                }
-
-                                switch(skillName) {
-                                    case 'tough':
-                                        hp += 15 + 15 * skillLevel;
-                                        break;
-                                    case 'construct':
-                                        hp += 2 * str;
-                                        break;
-                                }
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
                             }
+                            getAttrs(skillFieldNames, function(skillValues) {
+                                for(let i = 0; i < sidarray.length; i++) {
+                                    let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                                    if(!skillName) {
+                                        skillName = 'customSkill';
+                                    }
+                                    let skillLevel = 1;
+                                    if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
+                                        skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
+                                    }
 
-                            switch(values.type) {
-                                case 'flunky':
-                                    hp = 1;
-                                    break;
-                                case 'soldier':
-                                    hp = Math.ceil(hp / 2);
-                                    break;
-                                case 'master':
-                                    hp *= 2;
-                                    break;
-                            }
+                                    switch(skillName) {
+                                        case 'tough':
+                                            hp += 15 + 15 * skillLevel;
+                                            break;
+                                        case 'construct':
+                                            hp += 2 * str;
+                                            break;
+                                    }
+                                }
 
-                            // Set values
-                            setAttrs({
-                                hp_max: hp,
-                                hpInc: Math.ceil(hp / 5),
-                                hpCrit: Math.ceil(hp / 5) * 2
+                                switch(values.type) {
+                                    case 'flunky':
+                                        hp = 1;
+                                        break;
+                                    case 'soldier':
+                                        hp = Math.ceil(hp / 2);
+                                        break;
+                                    case 'master':
+                                        hp *= 2;
+                                        break;
+                                }
+
+                                //add orbment values
+                                hp += orbValue;
+
+                                // Set values
+                                setAttrs({
+                                    hp_max: hp,
+                                    hpInc: Math.ceil(hp / 5),
+                                    hpCrit: Math.ceil(hp / 5) * 2
+                                });
                             });
                         });
                     });
@@ -670,74 +741,93 @@
 
     function calculateStamina() {
         log('VALOR - Recalculating Max Stamina');
-        getAttrs(['level', 'mnd', 'spr', 'type'], function(values) {
-            let level = parseInt(values.level);
-            let mnd = parseInt(values.mnd);
-            let spr = parseInt(values.spr);
-
-            let st = 8 + 4 * level + 2 * spr + 2 * mnd;
-
-            // Apply Flaws
-            let flawFieldNames = [];
-            getSectionIDs('repeating_flaws', function(idarray) {
-                for(let i = 0; i < idarray.length; i++) {
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("ep"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbValue += quartz.value;
                 }
-                getAttrs(flawFieldNames, function(flawValues) {
+            });
+            getAttrs(['level', 'mnd', 'spr', 'type'], function(values) {
+                let level = parseInt(values.level);
+                let mnd = parseInt(values.mnd);
+                let spr = parseInt(values.spr);
+
+                let st = 8 + 4 * level + 2 * spr + 2 * mnd;
+
+                // Apply Flaws
+                let flawFieldNames = [];
+                getSectionIDs('repeating_flaws', function(idarray) {
                     for(let i = 0; i < idarray.length; i++) {
-                        let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
-                        if(!flawName) {
-                            flawName = 'customFlaw';
-                        }
-                        let flawLevel = 1;
-                        if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
-                            flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
-                        }
-
-                        // Apply effects
-                        switch(flawName) {
-                            case 'lackOfControl':
-                                st -= 2 + 6 * flawLevel;
-                                break;
-                        }
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
                     }
-
-                    // Apply Skills
-                    let skillFieldNames = [];
-                    getSectionIDs('repeating_skills', function(sidarray) {
-                        for(let i = 0; i < sidarray.length; i++) {
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
-                        }
-                        getAttrs(skillFieldNames, function(skillValues) {
-                            for(let i = 0; i < sidarray.length; i++) {
-                                let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                                if(!skillName) {
-                                    skillName = 'customSkill';
-                                }
-                                let skillLevel = 1;
-                                if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
-                                    skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
-                                }
-
-                                switch(skillName) {
-                                    case 'tireless':
-                                        st += 2 + 6 * skillLevel;
-                                        break;
-                                }
+                    getAttrs(flawFieldNames, function(flawValues) {
+                        for(let i = 0; i < idarray.length; i++) {
+                            let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
+                            if(!flawName) {
+                                flawName = 'customFlaw';
+                            }
+                            let flawLevel = 1;
+                            if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
+                                flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
                             }
 
-                            switch(values.type) {
-                                case 'master':
-                                    st *= 2;
+                            // Apply effects
+                            switch(flawName) {
+                                case 'lackOfControl':
+                                    st -= 2 + 6 * flawLevel;
                                     break;
                             }
+                        }
 
-                            // Set values
-                            setAttrs({
-                                st_max: st,
-                                stInc: Math.ceil(st / 5)
+                        // Apply Skills
+                        let skillFieldNames = [];
+                        getSectionIDs('repeating_skills', function(sidarray) {
+                            for(let i = 0; i < sidarray.length; i++) {
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                            }
+                            getAttrs(skillFieldNames, function(skillValues) {
+                                for(let i = 0; i < sidarray.length; i++) {
+                                    let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                                    if(!skillName) {
+                                        skillName = 'customSkill';
+                                    }
+                                    let skillLevel = 1;
+                                    if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
+                                        skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
+                                    }
+
+                                    switch(skillName) {
+                                        case 'tireless':
+                                            st += 2 + 6 * skillLevel;
+                                            break;
+                                    }
+                                }
+
+                                switch(values.type) {
+                                    case 'master':
+                                        st *= 2;
+                                        break;
+                                }
+
+                                st += orbValue;
+
+                                // Set values
+                                setAttrs({
+                                    st_max: st,
+                                    stInc: Math.ceil(st / 5)
+                                });
                             });
                         });
                     });
@@ -748,70 +838,89 @@
 
     function calculateDefense() {
         log('VALOR - Recalculating Defense');
-        getAttrs(['level', 'str', 'gut', 'type'], function(values) {
-            let level = parseInt(values.level);
-            let str = parseInt(values.str);
-            let gut = parseInt(values.gut);
-
-            let defense = 2 * level + str + gut;
-
-            // Apply Flaws
-            let flawFieldNames = [];
-            getSectionIDs('repeating_flaws', function(idarray) {
-                for(let i = 0; i < idarray.length; i++) {
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("defense"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbValue += quartz.value;
                 }
-                getAttrs(flawFieldNames, function(flawValues) {
+            });
+            getAttrs(['level', 'str', 'gut', 'type'], function(values) {
+                let level = parseInt(values.level);
+                let str = parseInt(values.str);
+                let gut = parseInt(values.gut);
+
+                let defense = 2 * level + str + gut;
+
+                // Apply Flaws
+                let flawFieldNames = [];
+                getSectionIDs('repeating_flaws', function(idarray) {
                     for(let i = 0; i < idarray.length; i++) {
-                        let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
-                        if(!flawName) {
-                            flawName = 'customFlaw';
-                        }
-                        let flawLevel = 1;
-                        if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
-                            flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
-                        }
-
-                        // Apply effects
-                        switch(flawName) {
-                            case 'weakDefender':
-                                defense -= 2 + 2 * flawLevel;
-                                break;
-                        }
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
                     }
-
-                    // Apply Skills
-                    let skillFieldNames = [];
-                    getSectionIDs('repeating_skills', function(sidarray) {
-                        for(let i = 0; i < sidarray.length; i++) {
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
-                        }
-                        getAttrs(skillFieldNames, function(skillValues) {
-                            for(let i = 0; i < sidarray.length; i++) {
-                                let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                                if(!skillName) {
-                                    skillName = 'customSkill';
-                                }
-                                let skillLevel = 1;
-                                if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
-                                    skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
-                                }
-
-                                switch(skillName) {
-                                    case 'ironDefense':
-                                        defense += 2 + 2 * skillLevel;
-                                        break;
-                                    case 'construct':
-                                        defense += Math.ceil(level / 5) * 2;
-                                        break;
-                                }
+                    getAttrs(flawFieldNames, function(flawValues) {
+                        for(let i = 0; i < idarray.length; i++) {
+                            let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
+                            if(!flawName) {
+                                flawName = 'customFlaw';
+                            }
+                            let flawLevel = 1;
+                            if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
+                                flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
                             }
 
-                            // Set values
-                            setAttrs({
-                                defense: defense
+                            // Apply effects
+                            switch(flawName) {
+                                case 'weakDefender':
+                                    defense -= 2 + 2 * flawLevel;
+                                    break;
+                            }
+                        }
+
+                        // Apply Skills
+                        let skillFieldNames = [];
+                        getSectionIDs('repeating_skills', function(sidarray) {
+                            for(let i = 0; i < sidarray.length; i++) {
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                            }
+                            getAttrs(skillFieldNames, function(skillValues) {
+                                for(let i = 0; i < sidarray.length; i++) {
+                                    let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                                    if(!skillName) {
+                                        skillName = 'customSkill';
+                                    }
+                                    let skillLevel = 1;
+                                    if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
+                                        skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
+                                    }
+
+                                    switch(skillName) {
+                                        case 'ironDefense':
+                                            defense += 2 + 2 * skillLevel;
+                                            break;
+                                        case 'construct':
+                                            defense += Math.ceil(level / 5) * 2;
+                                            break;
+                                    }
+                                }
+                                //add values from orbment
+                                defense += orbValue;
+
+                                // Set values
+                                setAttrs({
+                                    defense: defense
+                                });
                             });
                         });
                     });
@@ -822,70 +931,90 @@
 
     function calculateResistance() {
         log('VALOR - Recalculating Resistance');
-        getAttrs(['level', 'spr', 'mnd', 'type'], function(values) {
-            let level = parseInt(values.level);
-            let spr = parseInt(values.spr);
-            let mnd = parseInt(values.mnd);
-
-            let resistance = 2 * level + spr + mnd;
-
-            // Apply Flaws
-            let flawFieldNames = [];
-            getSectionIDs('repeating_flaws', function(idarray) {
-                for(let i = 0; i < idarray.length; i++) {
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("shield"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbValue += quartz.value;
                 }
-                getAttrs(flawFieldNames, function(flawValues) {
+            });
+            getAttrs(['level', 'spr', 'mnd', 'type'], function(values) {
+                let level = parseInt(values.level);
+                let spr = parseInt(values.spr);
+                let mnd = parseInt(values.mnd);
+
+                let resistance = 2 * level + spr + mnd;
+
+                // Apply Flaws
+                let flawFieldNames = [];
+                getSectionIDs('repeating_flaws', function(idarray) {
                     for(let i = 0; i < idarray.length; i++) {
-                        let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
-                        if(!flawName) {
-                            flawName = 'customFlaw';
-                        }
-                        let flawLevel = 1;
-                        if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
-                            flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
-                        }
-
-                        // Apply effects
-                        switch(flawName) {
-                            case 'energyVulnerability':
-                                resistance -= 2 + 2 * flawLevel;
-                                break;
-                        }
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
                     }
-
-                    // Apply Skills
-                    let skillFieldNames = [];
-                    getSectionIDs('repeating_skills', function(sidarray) {
-                        for(let i = 0; i < sidarray.length; i++) {
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
-                        }
-                        getAttrs(skillFieldNames, function(skillValues) {
-                            for(let i = 0; i < sidarray.length; i++) {
-                                let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                                if(!skillName) {
-                                    skillName = 'customSkill';
-                                }
-                                let skillLevel = 1;
-                                if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
-                                    skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
-                                }
-
-                                switch(skillName) {
-                                    case 'resistant':
-                                        resistance += 2 + 2 * skillLevel;
-                                        break;
-                                    case 'construct':
-                                        resistance -= Math.ceil(level / 5) * 2;
-                                        break;
-                                }
+                    getAttrs(flawFieldNames, function(flawValues) {
+                        for(let i = 0; i < idarray.length; i++) {
+                            let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
+                            if(!flawName) {
+                                flawName = 'customFlaw';
+                            }
+                            let flawLevel = 1;
+                            if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
+                                flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
                             }
 
-                            // Set values
-                            setAttrs({
-                                resistance: resistance
+                            // Apply effects
+                            switch(flawName) {
+                                case 'energyVulnerability':
+                                    resistance -= 2 + 2 * flawLevel;
+                                    break;
+                            }
+                        }
+
+                        // Apply Skills
+                        let skillFieldNames = [];
+                        getSectionIDs('repeating_skills', function(sidarray) {
+                            for(let i = 0; i < sidarray.length; i++) {
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                            }
+                            getAttrs(skillFieldNames, function(skillValues) {
+                                for(let i = 0; i < sidarray.length; i++) {
+                                    let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                                    if(!skillName) {
+                                        skillName = 'customSkill';
+                                    }
+                                    let skillLevel = 1;
+                                    if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
+                                        skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
+                                    }
+
+                                    switch(skillName) {
+                                        case 'resistant':
+                                            resistance += 2 + 2 * skillLevel;
+                                            break;
+                                        case 'construct':
+                                            resistance -= Math.ceil(level / 5) * 2;
+                                            break;
+                                    }
+                                }
+
+                                //add values from orbment
+                                resistance += orbValue;
+
+                                // Set values
+                                setAttrs({
+                                    resistance: resistance
+                                });
                             });
                         });
                     });
@@ -896,68 +1025,87 @@
 
     function calculateSpeed() {
         log('VALOR - Recalculating Move');
-        getAttrs(['agi'], function(values) {
-            let agi = parseInt(values.agi);
-
-            let speed = Math.ceil(agi / 4) + 2;
-
-            // Apply Flaws
-            let flawFieldNames = [];
-            getSectionIDs('repeating_flaws', function(idarray) {
-                for(let i = 0; i < idarray.length; i++) {
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("move"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbValue += quartz.value;
                 }
-                getAttrs(flawFieldNames, function(flawValues) {
+            });
+            getAttrs(['agi'], function(values) {
+                let agi = parseInt(values.agi);
+
+                let speed = Math.ceil(agi / 4) + 2;
+
+                // Apply Flaws
+                let flawFieldNames = [];
+                getSectionIDs('repeating_flaws', function(idarray) {
                     for(let i = 0; i < idarray.length; i++) {
-                        let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
-                        if(!flawName) {
-                            flawName = 'customFlaw';
-                        }
-                        let flawLevel = 1;
-                        if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
-                            flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
-                        }
-
-                        // Apply effects
-                        switch(flawName) {
-                            case 'slow':
-                                speed -= flawLevel;
-                                break;
-                            case 'immobile':
-                                speed = 0;
-                                break;
-                        }
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
                     }
-
-                    // Apply Skills
-                    let skillFieldNames = [];
-                    getSectionIDs('repeating_skills', function(sidarray) {
-                        for(let i = 0; i < sidarray.length; i++) {
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
-                        }
-                        getAttrs(skillFieldNames, function(skillValues) {
-                            for(let i = 0; i < sidarray.length; i++) {
-                                let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                                if(!skillName) {
-                                    skillName = 'customSkill';
-                                }
-                                let skillLevel = 1;
-                                if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
-                                    skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
-                                }
-
-                                switch(skillName) {
-                                    case 'sprinter':
-                                        speed += skillLevel;
-                                        break;
-                                }
+                    getAttrs(flawFieldNames, function(flawValues) {
+                        for(let i = 0; i < idarray.length; i++) {
+                            let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
+                            if(!flawName) {
+                                flawName = 'customFlaw';
+                            }
+                            let flawLevel = 1;
+                            if(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']) {
+                                flawLevel = parseInt(flawValues['repeating_flaws_' + idarray[i] + '_flawlevel']);
                             }
 
-                            // Set values
-                            setAttrs({
-                                speed: speed
+                            // Apply effects
+                            switch(flawName) {
+                                case 'slow':
+                                    speed -= flawLevel;
+                                    break;
+                                case 'immobile':
+                                    speed = 0;
+                                    break;
+                            }
+                        }
+
+                        // Apply Skills
+                        let skillFieldNames = [];
+                        getSectionIDs('repeating_skills', function(sidarray) {
+                            for(let i = 0; i < sidarray.length; i++) {
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                            }
+                            getAttrs(skillFieldNames, function(skillValues) {
+                                for(let i = 0; i < sidarray.length; i++) {
+                                    let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                                    if(!skillName) {
+                                        skillName = 'customSkill';
+                                    }
+                                    let skillLevel = 1;
+                                    if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
+                                        skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
+                                    }
+
+                                    switch(skillName) {
+                                        case 'sprinter':
+                                            speed += skillLevel;
+                                            break;
+                                    }
+                                }
+                                //add in orbment values
+                                speed += orbValue;
+
+                                // Set values
+                                setAttrs({
+                                    speed: speed
+                                });
                             });
                         });
                     });
@@ -1016,62 +1164,76 @@
 
     function calculateInitiative() {
         log('VALOR - Recalculating Initiative');
-        getAttrs(['dex','orbslot1'], function(values) {
-            let init = parseInt(values.dex);
-
-            // Apply Flaws
-            let flawFieldNames = [];
-            getSectionIDs('repeating_flaws', function(idarray) {
-                for(let i = 0; i < idarray.length; i++) {
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
-                    flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("action"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbValue += quartz.value;
                 }
-                getAttrs(flawFieldNames, function(flawValues) {
+            });
+            
+            getAttrs(['dex'], function(values) {
+                let init = parseInt(values.dex);
+
+                // Apply Flaws
+                let flawFieldNames = [];
+                getSectionIDs('repeating_flaws', function(idarray) {
                     for(let i = 0; i < idarray.length; i++) {
-                        let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
-                        if(!flawName) {
-                            flawName = 'customFlaw';
-                        }
-
-                        // Apply effects
-                        switch(flawName) {
-                            case 'slowToAct':
-                                init -= 2;
-                                break;
-                        }
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawname');
+                        flawFieldNames.push('repeating_flaws_' + idarray[i] + '_flawlevel');
                     }
+                    getAttrs(flawFieldNames, function(flawValues) {
+                        for(let i = 0; i < idarray.length; i++) {
+                            let flawName = flawValues['repeating_flaws_' + idarray[i] + '_flawname'];
+                            if(!flawName) {
+                                flawName = 'customFlaw';
+                            }
 
-                    // Apply Skills
-                    let skillFieldNames = [];
-                    getSectionIDs('repeating_skills', function(sidarray) {
-                        for(let i = 0; i < sidarray.length; i++) {
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                            // Apply effects
+                            switch(flawName) {
+                                case 'slowToAct':
+                                    init -= 2;
+                                    break;
+                            }
                         }
-                        getAttrs(skillFieldNames, function(skillValues) {
+
+                        // Apply Skills
+                        let skillFieldNames = [];
+                        getSectionIDs('repeating_skills', function(sidarray) {
                             for(let i = 0; i < sidarray.length; i++) {
-                                let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                                if(!skillName) {
-                                    skillName = 'customSkill';
-                                }
-
-                                switch(skillName) {
-                                    case 'quickToAct':
-                                        init += 2;
-                                        break;
-                                }
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
                             }
+                            getAttrs(skillFieldNames, function(skillValues) {
+                                for(let i = 0; i < sidarray.length; i++) {
+                                    let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                                    if(!skillName) {
+                                        skillName = 'customSkill';
+                                    }
 
-                            let orb1 = values.orbslot1;
-                            if(orb1.startsWith("action"))
-                            {
-                                let actionvalue = parseInt(orb1.charAt(orb1.length-1))
-                                init += actionvalue;
-                            }
+                                    switch(skillName) {
+                                        case 'quickToAct':
+                                            init += 2;
+                                            break;
+                                    }
+                                }
+                               
+                                    init += orbValue; //add in values from Action Quartz
 
-                            // Set values
-                            setAttrs({
-                                init: init
+
+                                // Set values
+                                setAttrs({
+                                    init: init
+                                });
                             });
                         });
                     });
@@ -1082,58 +1244,86 @@
 
     function calculateBonuses() {
         log('VALOR - Recalculating Attack/Defense Bonuses');
-        getAttrs(['type'], function(values) {
-
-            let atkBonus = 0;
-            let defBonus = 0;
-
-            if(values.type == 'master') {
-                atkBonus++;
-            }
-
-            // Apply Skills
-            let skillFieldNames = [];
-            getSectionIDs('repeating_skills', function(sidarray) {
-                for(let i = 0; i < sidarray.length; i++) {
-                    skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
-                    skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+        let slots = [];
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
+        getAttrs(slots, function(orbs) {
+            let orbAtkValue = 0;
+            let orbDefValue = 0;
+            slots.forEach(function(orb){
+                let orbId = orbs[orb]; 
+                if(orbId.startsWith("hit"))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbAtkValue += quartz.value;
                 }
-                getAttrs(skillFieldNames, function(skillValues) {
+
+                if(orbId.startsWith('evade'))
+                {
+                    let quartz = getQuartz(orbId);
+                    orbDefValue += quartz.value;
+                }
+            });
+            getAttrs(['type'], function(values) {
+
+                let atkBonus = 0;
+                let defBonus = 0;
+
+                if(values.type == 'master') {
+                    atkBonus++;
+                }
+
+                // Apply Skills
+                let skillFieldNames = [];
+                getSectionIDs('repeating_skills', function(sidarray) {
                     for(let i = 0; i < sidarray.length; i++) {
-                        let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
-                        if(!skillName) {
-                            skillName = 'customSkill';
-                        }
-                        let skillLevel = 1;
-                        if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
-                            skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
-                        }
-
-                        switch(skillName) {
-                            case 'increasedSize':
-                                atkBonus++;
-                                defBonus--;
-                                break;
-                            case 'diminuitive':
-                                atkBonus--;
-                                defBonus++;
-                                break;
-                        }
+                        skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                        skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
                     }
+                    getAttrs(skillFieldNames, function(skillValues) {
+                        for(let i = 0; i < sidarray.length; i++) {
+                            let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                            if(!skillName) {
+                                skillName = 'customSkill';
+                            }
+                            let skillLevel = 1;
+                            if(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']) {
+                                skillLevel = parseInt(skillValues['repeating_skills_' + sidarray[i] + '_skilllevel']);
+                            }
 
-                    let atkBonusDisp = ' ';
-                    if(atkBonus > 0) atkBonusDisp = '+' + atkBonus;
-                    if(atkBonus < 0) atkBonusDisp = atkBonus;
-                    let defBonusDisp = ' ';
-                    if(defBonus > 0) defBonusDisp = '+' + defBonus;
-                    if(defBonus < 0) defBonusDisp = defBonus;
+                            switch(skillName) {
+                                case 'increasedSize':
+                                    atkBonus++;
+                                    defBonus--;
+                                    break;
+                                case 'diminuitive':
+                                    atkBonus--;
+                                    defBonus++;
+                                    break;
+                            }
+                        }
 
-                    // Set values
-                    setAttrs({
-                        iatkrollbonus: atkBonus,
-                        idefrollbonus: defBonus,
-                        iatkrollbonusdisp: atkBonusDisp,
-                        idefrollbonusdisp: defBonusDisp,
+                        //add orbment values
+                        atkBonus += orbAtkValue;
+                        defBonus += orbDefValue;
+
+                        let atkBonusDisp = ' ';
+                        if(atkBonus > 0) atkBonusDisp = '+' + atkBonus;
+                        if(atkBonus < 0) atkBonusDisp = atkBonus;
+                        let defBonusDisp = ' ';
+                        if(defBonus > 0) defBonusDisp = '+' + defBonus;
+                        if(defBonus < 0) defBonusDisp = defBonus;
+
+                        // Set values
+                        setAttrs({
+                            iatkrollbonus: atkBonus,
+                            idefrollbonus: defBonus,
+                            iatkrollbonusdisp: atkBonusDisp,
+                            idefrollbonusdisp: defBonusDisp,
+                        });
                     });
                 });
             });
@@ -1441,8 +1631,8 @@
                                     spentTP -= ults[0];
                                     ults.splice(0,1);
                                 }
-                              
-                                if(spentTP > 0 && techValues['repeating_techs_' + tidarray[i] + '_tech_isarts'] !== '1') {
+                                //log(techValues['repeating_techs_' + tidarray[i] + '_tech_isarts']);
+                                if(spentTP > 0 && techValues['repeating_techs_' + tidarray[i] + '_tech_isarts'] !== 1) {
                                     unspentTP -= spentTP;
                                 }
                             }
@@ -2246,7 +2436,7 @@
             }
 
             let techLevel = techCoreLevel + totalModLevel;
-            if(techLevel > level + 3 || (techCoreLevel > level && techCore == 'summoning')) {
+            if((techLevel > level + 3 || (techCoreLevel > level && techCore == 'summoning')) && !(isArts == '1')) {
                 warnings.push('Technique Level is too high for current Character Level.');
             }
 
@@ -2670,55 +2860,135 @@
 
     function calculateOrbment() {
         log('VALOR - Recalculating OrbmentSlots');
-        getAttrs(['orbslot1', 'type'], function(values) {
-            let summary = '';
-            let images = {};
-            let quartz = getQuartz(values.orbslot1);
-            
-            let img= getQuartzImage(quartz.element).image;
-            log(img);
-            images['orbslot1Image'] = img;
-            setAttrs(images);
-            //summary += quartz.summary + '\n';
-            if(values.orbslot1 == 'aquableed')
-            {
-                let rowId = generateRowID();
-                let newAquaBleed = {};
+        let orbslot = '';
+        let slots = [];
+        let techs = [];
+        //let summary = '';
+        for(var i = 1; i <= QUARTZSLOTS;i++)
+        {
+            orbslot = 'orbslot' + i
+            slots.push(orbslot);
+        }
 
-                newAquaBleed['repeating_techs_'+rowId+'_tech_name']= 'AquaBleed';
-                newAquaBleed['repeating_techs_'+rowId+'_tech_stat']= 'spr';
-                newAquaBleed['repeating_techs_'+rowId+'_tech_core']= 'damage';
-                newAquaBleed['repeating_techs_'+rowId+'_tech_core_level'] = '2';
-                newAquaBleed['repeating_techs_'+rowId+'_tech_mods'] = 'Ranged Attack 2';
-                newAquaBleed['repeating_techs_'+rowId+'_tech_isarts']= '1';
-                setAttrs(newAquaBleed);
+        getAttrs(slots, function(values) {
+            slots.forEach(function(orbslot){
+                if(values[orbslot])
+                {
+                    let images = {};
+                    let summaries = {};
+                    let quartz = getQuartz(values[orbslot]);        
+                    let img= getQuartzImage(quartz.element).image;
+                    //log(img);
+                    images[orbslot + 'Image'] = img;
+                    setAttrs(images);
+                  
+                    //summary = quartz.summary;
+                    summaries[orbslot+"summary"] = quartz.summary;
+                    setAttrs(summaries);
 
-            }
-            else
-            {
-                let techFieldNames = [];
-                getSectionIDs('repeating_techs', function(tidarray) {
-                    for(let i = 0; i < tidarray.length; i++) {
-                        techFieldNames.push('repeating_techs_' + tidarray[i] + '_tech_name');                      
+                    if(quartz.type == 'tech')
+                    {                
+                        techs.push(quartz.id);
                     }
-                    getAttrs(techFieldNames, function(techValues) {
-                        for(let i = 0; i < tidarray.length; i++) {
-                            let techName = techValues['repeating_techs_' + tidarray[i] + '_tech_name'];
-                            if(techName == 'AquaBleed')
-                            {
-                                removeRepeatingRow('repeating_techs_' + tidarray[i]);
-                            }
-                        }
-
-                    });
-
-                });
-
+                }
+                else
+                {
+                    let summaries = {};
+                    summaries[orbslot+"summary"] = '';
+                    setAttrs(summaries);
+                }           
+            });
+            artsLibrary.forEach(function(art){
+                if(techs.includes(art.id))
+                {
+                    createArts(art);
+                }
+                else
+                {
+                    removeArts(art);
+                }
+            });
+            //setAttrs({orbsummary:summary});
+        });
                
+    }
 
+    function createArts(art)
+    {
+        createTech(art,1);
+    }
+
+    function createTech(tech,isArts)
+    {
+        //first ensure tech does not already exist
+        let techFieldNames = [];
+        let itemfound = false;
+        getSectionIDs('repeating_techs', function(tidarray) {
+            for(let i = 0; i < tidarray.length; i++) {
+                techFieldNames.push('repeating_techs_' + tidarray[i] + '_tech_name');    
+                techFieldNames.push('repeating_techs_' + tidarray[i] + '_tech_isarts');                    
             }
 
-            //setAttrs(orbsummary = summary);
+            getAttrs(techFieldNames, function(techValues) {
+
+                for(let i = 0; i < tidarray.length; i++) {
+                    let techName = techValues['repeating_techs_' + tidarray[i] + '_tech_name'];
+                    let techArts = techValues['repeating_techs_' + tidarray[i] + '_tech_isarts'];
+
+                    if(techName == tech.name && techArts == isArts)
+                    {
+                        itemfound = true;
+                    }
+                }
+              
+                if(!itemfound)
+                {
+                    let rowId = generateRowID();
+                    let newTech = {};
+
+                    newTech['repeating_techs_'+rowId+'_tech_name']= tech.name;
+                    newTech['repeating_techs_'+rowId+'_tech_stat']= tech.stat;
+                    newTech['repeating_techs_'+rowId+'_tech_core']= tech.core;
+                    newTech['repeating_techs_'+rowId+'_tech_core_level'] = tech.coreLevel;
+                    newTech['repeating_techs_'+rowId+'_tech_mods'] = tech.mods;
+                    newTech['repeating_techs_'+rowId+'_tech_limits'] = tech.limits;
+                    newTech['repeating_techs_'+rowId+'_tech_granted_skills']= tech.skills;
+                    newTech['repeating_techs_'+rowId+'_tech_inflicted_flaws']= tech.flaws;
+                    newTech['repeating_techs_'+rowId+'_tech_description']= tech.description;
+                    newTech['repeating_techs_'+rowId+'_tech_isarts']= isArts;
+
+                    setAttrs(newTech);
+                }
+            });
+        });        
+    }
+
+
+    function removeArts(art)
+    {
+        removeTech(art,1);
+    }
+
+    function removeTech(tech,isArts)
+    {
+        let techFieldNames = [];
+        getSectionIDs('repeating_techs', function(tidarray) {
+            for(let i = 0; i < tidarray.length; i++) {
+                techFieldNames.push('repeating_techs_' + tidarray[i] + '_tech_name');    
+                techFieldNames.push('repeating_techs_' + tidarray[i] + '_tech_isarts');                    
+            }
+            getAttrs(techFieldNames, function(techValues) {
+                for(let i = 0; i < tidarray.length; i++) {
+                    let techName = techValues['repeating_techs_' + tidarray[i] + '_tech_name'];
+                    let techArts = techValues['repeating_techs_' + tidarray[i] + '_tech_isarts'];
+                    if(techName == tech.name && techArts == isArts)
+                    {
+                        removeRepeatingRow('repeating_techs_' + tidarray[i]);
+                    }
+                }
+
+            });
+
         });
     }
 
@@ -2799,11 +3069,22 @@
         calculateBoostVisibility();
     });
 
-    on('change:orbslot1', function(eventInfo) {
-        calculateOrbment();
+    on('change:orbslot1 change:orbslot2 change:orbslot3 change:orbslot4 change:orbslot5', function(eventInfo) {
+        calculateOrbment(); //dont call calculate orbment in more than once place at the same exact time or you can get duplicate techs
+        calculateAttack();
+        calculateActiveAttributes();
+        calculateHealth();
+        calculateDefense();
+        calculateStamina();
+        calculateResistance();
+        calculateSpeed();
+        calculateDamageIncrement();
+        calculateInitiative();
+        calculateBonuses();
+        //calculateTP();
     });
 
-    on('sheet:opened change:orbslot1', function() {
+    on('sheet:opened', function() {
         // Update attributes
         calculateBaseAttributes();
         calculateAttack();
@@ -2817,7 +3098,9 @@
         calculateInitiative();
         calculateFlawsAndSkills();
         calculateBonuses();
+        calculateOrbment();
         calculateTP();
+        
 
         // Update techs
         getSectionIDs('repeating_techs', function(tidarray) {
@@ -3074,31 +3357,197 @@
     </div>
     <div class="sheet-tab-content sheet-tab2">
         <div class="orbment-header">Orbment Slots</div>
-        <div class="attributes-header-label">
+        <div class="attributes-header-label" style="float:left;padding-top:5px;margin-right:10px">
             <span class="label">Slot 1: </span> <input type="hidden" name="attr_orbslot1Image" class="attributes-orbslot1Image"> <div></div>
         </div>
         <div>
             <select name="attr_orbslot1" class="attributes-orbslot1" selected="None">
                 <option value="none">Empty</option>
-                <option value="attack1">Attack 1</option>
-                <option value="aquableed">Aqua Bleed</option>
-                <option value="action1">Action 1</option>
-                <option value="action2">Action 2</option>
+                <optgroup label="Fire Quartz">
+                    <option value="attack1">Attack 1</option>
+                </optgroup>
+                <optgroup label="Earth Quartz">
+                    <option value="defense1">Defense 1</option>
+                </optgroup>
+                <optgroup label="Water Quartz">
+                    <option value="shield1">Shield 1</option>
+                    <option value="aquableed">Aqua Bleed</option>
+                    <option value="tear">Tear</option> 
+                </optgroup>
+                <optgroup label="Wind Quartz">
+                    <option value="evade1">Evade 1</option> 
+                    <option value="move1">Move 1</option> 
+                </optgroup>
+                <optgroup label="Time Quartz">   
+                    <option value="action1">Action 1</option>
+                    <option value="action2">Action 2</option>
+                    <option value="clockup">Clock Up</option>
+                </optgroup>
+                <optgroup label="Space Quartz">
+                    <option value="hit1">Hit 1</option> 
+                </optgroup>
+                <optgroup label="Mirage Quartz">
+                    <option value="mind1">Mind 1</option> 
+                    <option value="ep1">EP 1</option> 
+                </optgroup>
             </select>
         </div>
-        <div class="attributes-header-label">
-            <span class="label">Slot 2: <span name="attr_orbslot2Image" class="attributes-orbslot2Image"></span>
+        <br style="clear:both"/>
+        <div class="attributes-header-label" style="float:left;padding-top:5px;margin-right:10px">
+            <span class="label">Slot 2: </span> <input type="hidden" name="attr_orbslot2Image" class="attributes-orbslot2Image"> <div></div>
         </div>
         <div>
             <select name="attr_orbslot2" class="attributes-orbslot2" selected="None">
                 <option value="none">Empty</option>
-                <option value="attack1">Attack 1</option>
-                <option value="aquableed">Aqua Bleed</option>
-                <option value="action1">Action 1</option>
-                <option value="action2">Action 2</option>
+                <optgroup label="Fire Quartz">
+                    <option value="attack1">Attack 1</option>
+                </optgroup>
+                <optgroup label="Earth Quartz">
+                    <option value="defense1">Defense 1</option>
+                </optgroup>
+                <optgroup label="Water Quartz">
+                    <option value="shield1">Shield 1</option>
+                    <option value="aquableed">Aqua Bleed</option>
+                    <option value="tear">Tear</option> 
+                </optgroup>
+                <optgroup label="Wind Quartz">
+                    <option value="evade1">Evade 1</option>
+                    <option value="move1">Move 1</option>  
+                </optgroup>
+                <optgroup label="Time Quartz">   
+                    <option value="action1">Action 1</option>
+                    <option value="action2">Action 2</option>
+                    <option value="clockup">Clock Up</option>
+                </optgroup>
+                <optgroup label="Space Quartz">
+                    <option value="hit1">Hit 1</option> 
+                </optgroup>
+                <optgroup label="Mirage Quartz">
+                    <option value="mind1">Mind 1</option> 
+                    <option value="ep1">EP 1</option> 
+                </optgroup>
             </select>
         </div>
-        <div><span>Summary:</span> <span name="attr_orbsummary" class="attributes-orbsummary"></span> </div>
+        <br style="clear:both"/>
+        <div class="attributes-header-label" style="float:left;padding-top:5px;margin-right:10px">
+            <span class="label">Slot 3: </span> <input type="hidden" name="attr_orbslot3Image" class="attributes-orbslot3Image"> <div></div>
+        </div>
+        <div>
+            <select name="attr_orbslot3" class="attributes-orbslot3" selected="None">
+                <option value="none">Empty</option>
+                <optgroup label="Fire Quartz">
+                    <option value="attack1">Attack 1</option>
+                </optgroup>
+                <optgroup label="Earth Quartz">
+                    <option value="defense1">Defense 1</option>
+                </optgroup>
+                <optgroup label="Water Quartz">
+                    <option value="shield1">Shield 1</option>
+                    <option value="aquableed">Aqua Bleed</option>
+                    <option value="tear">Tear</option> 
+                </optgroup>
+                <optgroup label="Wind Quartz">
+                    <option value="evade1">Evade 1</option> 
+                    <option value="move1">Move 1</option> 
+                </optgroup>
+                <optgroup label="Time Quartz">   
+                    <option value="action1">Action 1</option>
+                    <option value="action2">Action 2</option>
+                    <option value="clockup">Clock Up</option>
+                </optgroup>
+                <optgroup label="Space Quartz">
+                    <option value="hit1">Hit 1</option> 
+                </optgroup>
+                <optgroup label="Mirage Quartz">
+                    <option value="mind1">Mind 1</option> 
+                    <option value="ep1">EP 1</option> 
+                </optgroup>
+            </select>
+        </div>
+        <br style="clear:both"/>
+        <div class="attributes-header-label" style="float:left;padding-top:5px;margin-right:10px">
+            <span class="label">Slot 4: </span> <input type="hidden" name="attr_orbslot4Image" class="attributes-orbslot4Image"> <div></div>
+        </div>
+        <div>
+            <select name="attr_orbslot4" class="attributes-orbslot4" selected="None">
+                <option value="none">Empty</option>
+                <optgroup label="Fire Quartz">
+                    <option value="attack1">Attack 1</option>
+                </optgroup>
+                <optgroup label="Earth Quartz">
+                    <option value="defense1">Defense 1</option>
+                </optgroup>
+                <optgroup label="Water Quartz">
+                    <option value="shield1">Shield 1</option>
+                    <option value="aquableed">Aqua Bleed</option>
+                    <option value="tear">Tear</option> 
+                </optgroup>
+                <optgroup label="Wind Quartz">
+                    <option value="evade1">Evade 1</option> 
+                    <option value="move1">Move 1</option> 
+                </optgroup>
+                <optgroup label="Time Quartz">   
+                    <option value="action1">Action 1</option>
+                    <option value="action2">Action 2</option>
+                    <option value="clockup">Clock Up</option>
+                </optgroup>
+                <optgroup label="Space Quartz">
+                    <option value="hit1">Hit 1</option> 
+                </optgroup>
+                <optgroup label="Mirage Quartz">
+                    <option value="mind1">Mind 1</option> 
+                    <option value="ep1">EP 1</option> 
+                </optgroup>
+            </select>
+        </div>
+        <br style="clear:both"/>
+        <div class="attributes-header-label" style="float:left;padding-top:5px;margin-right:10px">
+            <span class="label">Slot 5: </span> <input type="hidden" name="attr_orbslot5Image" class="attributes-orbslot5Image"> <div></div>
+        </div>
+        <div>
+            <select name="attr_orbslot5" class="attributes-orbslot5" selected="None">
+                <option value="none">Empty</option>
+                <optgroup label="Fire Quartz">
+                    <option value="attack1">Attack 1</option>
+                </optgroup>
+                <optgroup label="Earth Quartz">
+                    <option value="defense1">Defense 1</option>
+                </optgroup>
+                <optgroup label="Water Quartz">
+                    <option value="shield1">Shield 1</option>
+                    <option value="aquableed">Aqua Bleed</option>
+                    <option value="tear">Tear</option> 
+                </optgroup>
+                <optgroup label="Wind Quartz">
+                    <option value="evade1">Evade 1</option>
+                    <option value="move1">Move 1</option>  
+                </optgroup>
+                <optgroup label="Time Quartz">   
+                    <option value="action1">Action 1</option>
+                    <option value="action2">Action 2</option>
+                    <option value="clockup">Clock Up</option>
+                </optgroup>
+                <optgroup label="Space Quartz">
+                    <option value="hit1">Hit 1</option> 
+                </optgroup>
+                <optgroup label="Mirage Quartz">
+                    <option value="mind1">Mind 1</option> 
+                    <option value="ep1">EP 1</option> 
+                </optgroup>
+            </select>
+        </div>
+        <br style="clear:both"/>
+        <div>
+            <h3>Summary:</h3> 
+            <ul>
+                <li><span name="attr_orbslot1summary" class="attributes-orbslot1summary"></span></li>
+                <li><span name="attr_orbslot2summary" class="attributes-orbslot2summary"></span></li>
+                <li><span name="attr_orbslot3summary" class="attributes-orbslot3summary"></span></li>
+                <li><span name="attr_orbslot4summary" class="attributes-orbslot4summary"></span></li>
+                <li><span name="attr_orbslot5summary" class="attributes-orbslot5summary"></span></li>
+            </ul>
+            
+        </div>
     </div>
     <div class="sheet-tab-content sheet-tab3">
         <div class="flaws-header">FLAWS</div>
