@@ -555,6 +555,10 @@ input[name="attr_tech_isarts"][value="1"]+.sheet-tech {
     background-color: cyan;
 }
 
+input[name="attr_skillisextra"][value="1"]+.sheet-skill {
+    background-color: cyan;
+}
+
 /* input[value="none-quartz"]+div {
     height:35px;
     width:35px;

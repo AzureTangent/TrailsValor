@@ -290,9 +290,10 @@
         {type: 'stat', value: 30, element: 'water', summary: 'HP 1: Increases Max HP by 30', id: 'hp1' },
         {type: 'stat', value: 6, element: 'mirage', summary: 'Mind 1: Increases Energy Attack by 6', id: 'mind1' },
         {type: 'stat', value: 10, element: 'mirage', summary: 'EP 1: Increases Stamina by 10', id: 'ep1' },
-        {type: 'tech', value: 1, element: 'water', summary: 'Tear: Grants access to the Art Tear', id:'tear'},
-        {type: 'tech', value: 2, element: 'water', summary: 'Aqua Bleed: Grants access to the Art Aqua Bleed', id: 'aquableed' },
-        {type: 'tech', value: 3, element: 'time', summary: 'Clock Up: Grants access to the Art Clock Up', id: 'clockup' }
+        {type: 'tech', value: 'tear', element: 'water', summary: 'Tear: Grants access to the Art Tear', id:'tear'},
+        {type: 'tech', value: 'aquableed', element: 'water', summary: 'Aqua Bleed: Grants access to the Art Aqua Bleed', id: 'aquableed' },
+        {type: 'tech', value: 'clockup', element: 'time', summary: 'Clock Up: Grants access to the Art Clock Up', id: 'clockup' },
+        {type: 'skill', value: 'sizeUp', element: 'mirage', summary: 'Analyze: Grants the skill Size Up', id: 'analyze'}
     ];
 
     let artsLibrary = [
@@ -327,6 +328,17 @@
 
     function getQuartzTech(name){
         return artsLibrary.find(function(q) {
+            return q.id == name;
+        });
+    }
+
+    function getSkill(name){
+        return getLibraryItemByName(skillLibrary, name);
+    }
+
+    function getLibraryItemByName(library,name)
+    {
+        return library.find(function(q) {
             return q.id == name;
         });
     }
@@ -1422,11 +1434,13 @@
                         for(var i = 0; i < sidarray.length; i++) {
                             skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
                             skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                            skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillisextra');
                         }
                         getAttrs(skillFieldNames, function(skillValues) {
                             for(var i = 0; i < sidarray.length; i++) {
                                 var warning = ' ';
                                 var skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                                var isExtra = skillValues['repeating_skills_' + sidarray[i] + '_skillisextra'];
                                 if(!skillName) {
                                     skillName = 'customSkill';
                                 }
@@ -1480,8 +1494,10 @@
                                     var skillAttrs = {};
                                     skillAttrs['repeating_skills_' + sidarray[i] + '_warning'] = warning;
                                     setAttrs(skillAttrs, { silent: true });
-
-                                    unspentSP -= skill.cost + (skillLevel - 1) * skill.levelUp;
+                                    if(isExtra != 1) //do not calculate spent SP if skill is an extra skill
+                                    {
+                                        unspentSP -= skill.cost + (skillLevel - 1) * skill.levelUp;
+                                    }
                                 }
                             }
 
@@ -2863,6 +2879,7 @@
         let orbslot = '';
         let slots = [];
         let techs = [];
+        let skills = [];
         //let summary = '';
         for(var i = 1; i <= QUARTZSLOTS;i++)
         {
@@ -2890,6 +2907,11 @@
                     {                
                         techs.push(quartz.id);
                     }
+                    else if(quartz.type == 'skill')
+                    {
+                        skills.push(quartz.value);
+                    }
+
                 }
                 else
                 {
@@ -2908,9 +2930,65 @@
                     removeArts(art);
                 }
             });
+
+            setOrbmentSkills(skills);
+
             //setAttrs({orbsummary:summary});
         });
                
+    }
+
+    function setOrbmentSkills(skills)
+    {
+        let skillFieldNames =[];
+        let foundSkills = [];
+        getSectionIDs('repeating_skills', function(sidarray) {
+            for(let i = 0; i < sidarray.length; i++) {
+                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
+                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
+                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillisextra');
+            }
+            getAttrs(skillFieldNames, function(skillValues) {
+                for(let i = 0; i < sidarray.length; i++) {
+                    let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
+                    let isExtra = skillValues['repeating_skills_' + sidarray[i] + '_skillisextra'];
+                    if(isExtra == 1)
+                    {
+                        if(skills.includes(skillName))
+                        {
+                            foundSkills.push(skillName);
+                        }
+                        else
+                        {
+                            removeRepeatingRow('repeating_skills_' + sidarray[i]);
+                        }
+                    }
+                    
+                }
+
+                skills.forEach(function(skill) {
+                    if(!foundSkills.includes(skill))
+                    {
+                        addSkill(skill,1,1);
+                    }
+                });
+            });
+        });
+    }
+
+    function addSkill(name,level,extra)
+    {
+        let rowId = generateRowID();
+        let newskill = {};
+
+        newskill['repeating_skills_'+rowId+'_skillname']= name; 
+        newskill['repeating_skills_'+rowId+'_skilllevel']= level;
+        newskill['repeating_skills_'+rowId+'_skillisextra']= extra;
+        if(extra == 1)
+        {
+            newskill['repeating_skills_'+rowId+'_skillnotes']= 'Skill provided by current Orbment settings';
+        }
+        setAttrs(newskill);
     }
 
     function createArts(art)
@@ -3095,10 +3173,11 @@
         calculateResistance();
         calculateSpeed();
         calculateDamageIncrement();
-        calculateInitiative();
+        //calculateInitiative(); moving this down to see if it resolve the NaN issue TODO remove if it works put it back if it doesnt
         calculateFlawsAndSkills();
         calculateBonuses();
         calculateOrbment();
+        calculateInitiative();
         calculateTP();
         
 
@@ -3388,7 +3467,8 @@
                 </optgroup>
                 <optgroup label="Mirage Quartz">
                     <option value="mind1">Mind 1</option> 
-                    <option value="ep1">EP 1</option> 
+                    <option value="ep1">EP 1</option>
+                    <option value="analyze">Analyze</option>  
                 </optgroup>
             </select>
         </div>
@@ -3424,7 +3504,8 @@
                 </optgroup>
                 <optgroup label="Mirage Quartz">
                     <option value="mind1">Mind 1</option> 
-                    <option value="ep1">EP 1</option> 
+                    <option value="ep1">EP 1</option>
+                    <option value="analyze">Analyze</option>   
                 </optgroup>
             </select>
         </div>
@@ -3461,6 +3542,7 @@
                 <optgroup label="Mirage Quartz">
                     <option value="mind1">Mind 1</option> 
                     <option value="ep1">EP 1</option> 
+                    <option value="analyze">Analyze</option>  
                 </optgroup>
             </select>
         </div>
@@ -3497,6 +3579,7 @@
                 <optgroup label="Mirage Quartz">
                     <option value="mind1">Mind 1</option> 
                     <option value="ep1">EP 1</option> 
+                    <option value="analyze">Analyze</option>  
                 </optgroup>
             </select>
         </div>
@@ -3533,6 +3616,7 @@
                 <optgroup label="Mirage Quartz">
                     <option value="mind1">Mind 1</option> 
                     <option value="ep1">EP 1</option> 
+                    <option value="analyze">Analyze</option>  
                 </optgroup>
             </select>
         </div>
@@ -3610,6 +3694,7 @@
         <div class="skills-header">SKILLS</div>
 
         <fieldset class="repeating_skills">
+            <input type="hidden" class="skill-field" value="0" name="attr_skillisextra">
             <div class="skill">
                 <div class="skill-upper">
                     <select class="skill-picker" name="attr_skillname" selected="customSkill">
