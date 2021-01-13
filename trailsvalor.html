@@ -297,9 +297,9 @@
     ];
 
     let artsLibrary = [
-        {id: 'aquableed', name: 'Aqua Bleed', description: 'Aqua Bleed is a water-elemental Orbal Art', stat:'spr',core:'damage',coreLevel:'2',mods:'Ranged Attack 2\nPiercing Attack', limits:'', skills: '', flaws:''},
-        {id: 'tear', name: 'Tear', description: 'Tear is a basic water-elemental healing Orbal Art', stat:'spr',core:'healing',coreLevel:'4',mods:'Ranged Attack 2', limits:'Set up limit', skills: '', flaws:''},
-        {id: 'clockup', name: 'Clock Up', description: 'Clock Up is a time-elemental boosting Orbal Art', stat:'agi',core:'boost',coreLevel:'4',mods:'Ranged Attack 2', limits:'Set up limit', skills: 'Sprinter', flaws:''}
+        {id: 'aquableed', name: 'Aqua Bleed', description: 'Aqua Bleed is a water-elemental Orbal Art',         stat:'spr',core:'damage',  coreLevel:'2', element: 'water', mods:'Ranged Attack 2,Piercing Attack,Elemental', limits:'', skills: '', flaws:''},
+        {id: 'tear',      name: 'Tear',       description: 'Tear is a basic water-elemental healing Orbal Art', stat:'spr',core:'healing', coreLevel:'4', element: 'water', mods:'Ranged Attack 2', limits:'Set up limit', skills: '', flaws:''},
+        {id: 'clockup',   name: 'Clock Up',   description: 'Clock Up is a time-elemental boosting Orbal Art',   stat:'agi',core:'boost',   coreLevel:'4', element: 'time', mods:'Ranged Attack 2', limits:'Set up limit', skills: 'Sprinter', flaws:''}
     ];
 
     const QUARTZSLOTS = 5; //number of orbment slots to fill
@@ -1807,6 +1807,7 @@
 
             let hasSkills = false;
             let hasFlaws = false;
+            let isElemental = false;
             let barrierFreebie = false;
             let isPersistent = false;
             let isThrow = false;
@@ -2387,6 +2388,7 @@
                     if(techStat == 'str' || techStat == 'agi') {
                         totalModLevel++;
                     }
+                    isElemental = true;
                 } else if(mod.indexOf('defeat lock') == 0) {
                     summary += "If target is incapacitated, they can't be revived for 24 hours unless this character is defeated. ";
                     totalModLevel += 3;
@@ -2852,6 +2854,8 @@
             attrs['repeating_techs_' + techId + '_tech_skill_sp_max'] = skillSpMax;
             attrs['repeating_techs_' + techId + '_tech_is_mimic'] = techCore == 'mimic' || techCore == 'ultMimic'
                 ? 'on' : 'off';
+            attrs['repeating_techs_' + techId + '_tech_is_elemental'] = isElemental
+                ? 'on' : 'off';
             attrs['repeating_techs_' + techId + '_tech_has_flaws'] = hasFlaws
                 ? 'on' : 'off';
             attrs['repeating_techs_' + techId + '_tech_has_skills'] = hasSkills
@@ -3028,13 +3032,13 @@
                     newTech['repeating_techs_'+rowId+'_tech_stat']= tech.stat;
                     newTech['repeating_techs_'+rowId+'_tech_core']= tech.core;
                     newTech['repeating_techs_'+rowId+'_tech_core_level'] = tech.coreLevel;
-                    newTech['repeating_techs_'+rowId+'_tech_mods'] = tech.mods;
-                    newTech['repeating_techs_'+rowId+'_tech_limits'] = tech.limits;
+                    newTech['repeating_techs_'+rowId+'_tech_mods'] = tech.mods.replaceAll(',','\n');
+                    newTech['repeating_techs_'+rowId+'_tech_limits'] = tech.limits.replaceAll(',','\n');
                     newTech['repeating_techs_'+rowId+'_tech_granted_skills']= tech.skills;
                     newTech['repeating_techs_'+rowId+'_tech_inflicted_flaws']= tech.flaws;
                     newTech['repeating_techs_'+rowId+'_tech_description']= tech.description;
                     newTech['repeating_techs_'+rowId+'_tech_isarts']= isArts;
-
+                    newTech['repeating_techs_'+rowId+'_tech_element']= tech.element;
                     setAttrs(newTech);
                 }
             });
@@ -4150,6 +4154,23 @@
                         <div class="tech-block conditional-block">
                             <span class="label">Mimicked Tech:</span>
                             <input class="tech-field" type="text" name="attr_tech_mimic_target" />
+                        </div>
+                    </div>
+                    //TODO elemental support
+                    <div class="tech-conditional-field">
+                        <input type="checkbox" class="conditional-check" name="attr_tech_is_elemental">
+                        <div class="tech-block conditional-block"> 
+                            <span class="label">Tech Element:</span>
+                            <select class="tech-field"  name="attr_tech_element">
+                                <option value="none" selected="selected">None</option>
+                                <option value="earth">Earth</option>
+                                <option value="fire" >Fire</option>
+                                <option value="wind">Wind</option>
+                                <option value="water">Water</option>
+                                <option value="time">Time</option>
+                                <option value="space">Space</option>
+                                <option value="mirage">Mirage</option>
+                            </select>
                         </div>
                     </div>
                 </div>
