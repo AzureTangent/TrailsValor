@@ -2854,7 +2854,7 @@
             attrs['repeating_techs_' + techId + '_tech_skill_sp_max'] = skillSpMax;
             attrs['repeating_techs_' + techId + '_tech_is_mimic'] = techCore == 'mimic' || techCore == 'ultMimic'
                 ? 'on' : 'off';
-            attrs['repeating_techs_' + techId + '_tech_is_elemental'] = isElemental
+            attrs['repeating_techs_' + techId + '_tech_is_elemental'] = isElemental 
                 ? 'on' : 'off';
             attrs['repeating_techs_' + techId + '_tech_has_flaws'] = hasFlaws
                 ? 'on' : 'off';
@@ -3177,7 +3177,6 @@
         calculateResistance();
         calculateSpeed();
         calculateDamageIncrement();
-        //calculateInitiative(); moving this down to see if it resolve the NaN issue TODO remove if it works put it back if it doesnt
         calculateFlawsAndSkills();
         calculateBonuses();
         calculateOrbment();
@@ -4156,7 +4155,6 @@
                             <input class="tech-field" type="text" name="attr_tech_mimic_target" />
                         </div>
                     </div>
-                    //TODO elemental support
                     <div class="tech-conditional-field">
                         <input type="checkbox" class="conditional-check" name="attr_tech_is_elemental">
                         <div class="tech-block conditional-block"> 
