@@ -278,26 +278,28 @@
     ];
 
     let quartzLibrary = [
-        {type: 'empty', value: 0, element: 'none', summary: ' - Empty - ', id: 'none' },
-        {type: 'stat', value: 1, element: 'time', summary: 'Action 1: Increases Initiative by 1', id: 'action1' },
-        {type: 'stat', value: 2, element: 'time', summary: 'Action 2: Initiative by 2', id: 'action2' },
-        {type: 'stat', value: 6, element: 'fire', summary: 'Attack 1: Increases Physical Attack by 6', id: 'attack1' },
-        {type: 'stat', value: 6, element: 'earth', summary: 'Defense 1: Increases Defense by 6', id: 'defense1' },
-        {type: 'stat', value: 6, element: 'water', summary: 'Shield 1: Increases Resistance by 6', id: 'shield1' },
-        {type: 'stat', value: 1, element: 'wind' , summary: 'Evade 1: Increases defense rolls by 1', id: 'evade1' },
-        {type: 'stat', value: 1, element: 'wind' , summary: 'Move 1: Increases move distance by 1', id: 'move1' },
-        {type: 'stat', value: 1, element: 'space', summary: 'Hit 1: Increases attack rolls by 1', id: 'hit1' },
-        {type: 'stat', value: 30, element: 'water', summary: 'HP 1: Increases Max HP by 30', id: 'hp1' },
-        {type: 'stat', value: 6, element: 'mirage', summary: 'Mind 1: Increases Energy Attack by 6', id: 'mind1' },
-        {type: 'stat', value: 10, element: 'mirage', summary: 'EP 1: Increases Stamina by 10', id: 'ep1' },
+        {type: 'empty', value: 'none', element: 'none', summary: ' - Empty - ', id: 'none' },
+        {type: 'stat', value: 'init+1', element: 'time', summary: 'Action 1: Increases Initiative by 1', id: 'action1' }, 
+        {type: 'stat', value: 'init+2', element: 'time', summary: 'Action 2: Initiative by 2', id: 'action2' },
+        {type: 'stat', value: 'patk+2,patk+4', element: 'fire', summary: 'Attack 1: Increases Physical Attack by 6', id: 'attack1' },
+        {type: 'stat', value: 'def+6', element: 'earth', summary: 'Defense 1: Increases Defense by 6', id: 'defense1' },
+        {type: 'stat', value: 'res+6', element: 'water', summary: 'Shield 1: Increases Resistance by 6', id: 'shield1' },
+        {type: 'stat', value: 'defroll+1', element: 'wind' , summary: 'Evade 1: Increases defense rolls by 1', id: 'evade1' },
+        {type: 'stat', value: 'move+1', element: 'wind' , summary: 'Move 1: Increases move distance by 1', id: 'move1' },
+        {type: 'stat', value: 'atkroll+1', element: 'space', summary: 'Hit 1: Increases attack rolls by 1', id: 'hit1' },
+        {type: 'stat', value: 'hp+30', element: 'water', summary: 'HP 1: Increases Max HP by 30', id: 'hp1' },
+        {type: 'stat', value: 'eatk+6', element: 'mirage', summary: 'Mind 1: Increases Energy Attack by 6', id: 'mind1' },
+        {type: 'stat', value: 'st+10', element: 'mirage', summary: 'EP 1: Increases Stamina by 10', id: 'ep1' },
         {type: 'tech', value: 'tear', element: 'water', summary: 'Tear: Grants access to the Art Tear', id:'tear'},
         {type: 'tech', value: 'aquableed', element: 'water', summary: 'Aqua Bleed: Grants access to the Art Aqua Bleed', id: 'aquableed' },
         {type: 'tech', value: 'clockup', element: 'time', summary: 'Clock Up: Grants access to the Art Clock Up', id: 'clockup' },
+        {type: 'complex', value: 'tech-firebolt,patk+6,skill-sizeUp', element: 'fire', summary: 'Fire Bolt SR: Grants Access to the fire bolt skill \n  Increases Physical Attack by 6', id: 'fireboltSR' },
         {type: 'skill', value: 'sizeUp', element: 'mirage', summary: 'Analyze: Grants the skill Size Up', id: 'analyze'}
     ];
 
     let artsLibrary = [
         {id: 'aquableed', name: 'Aqua Bleed', description: 'Aqua Bleed is a water-elemental Orbal Art',         stat:'spr',core:'damage',  coreLevel:'2', element: 'water', mods:'Ranged Attack 2,Piercing Attack,Elemental', limits:'', skills: '', flaws:''},
+        {id: 'firebolt', name: 'Fire Bolt', description: 'Fire Bolt is a fire-elemental Orbal Art',         stat:'spr',core:'damage',  coreLevel:'2', element: 'fire', mods:'Ranged Attack 2,Piercing Attack,Elemental', limits:'', skills: '', flaws:''},
         {id: 'tear',      name: 'Tear',       description: 'Tear is a basic water-elemental healing Orbal Art', stat:'spr',core:'healing', coreLevel:'4', element: 'water', mods:'Ranged Attack 2', limits:'Set up limit', skills: '', flaws:''},
         {id: 'clockup',   name: 'Clock Up',   description: 'Clock Up is a time-elemental boosting Orbal Art',   stat:'agi',core:'boost',   coreLevel:'4', element: 'time', mods:'Ranged Attack 2', limits:'Set up limit', skills: 'Sprinter', flaws:''}
     ];
@@ -332,8 +334,105 @@
         });
     }
 
+    function getQuartzModifer(quartz,attribute)
+    {
+        let modValue = 0;
+        if(quartz.type.includes('stat') || quartz.type.includes('complex'))
+        {
+            let modifiers = quartz.value.split(',');
+            modifiers.forEach(function(mod)
+            {
+                if(mod.includes(attribute))
+                {
+                    let index = mod.indexOf('+');
+                    if(index > -1 && index < mod.length)
+                    {
+                        let add = mod.substring(index);
+                        modValue+=  parseInt(add);
+                    }
+
+                    index = mod.indexOf('-');
+                    if(index > -1 && index < mod.length)
+                    {
+                        let minus = mod.substring(index);
+                        modValue+=  parseInt(minus);
+                    }
+                }
+            });
+        }
+        return modValue;
+    }
+
+    function getComplexQuartzString(quartz,attribute)
+    {
+        let modValue = [];
+        console.log(quartz); //todo remove
+        let modifiers = quartz.value.split(',');
+        modifiers.forEach(function(mod)
+        {
+            if(mod.includes(attribute))
+            {
+                let index = mod.indexOf('-');
+                if(index > -1 && index < mod.length)
+                {
+                    let item = mod.substring(index+1);
+                    if(item != '')
+                    {
+                        modValue.push(item); 
+                    }                   
+                }
+            }
+        });
+
+        return modValue;
+    }
+
+    function getSlotsModifier(slots, orbs, attribute){
+        let orbValue = 0;
+        slots.forEach(function(orb){
+            let orbId = orbs[orb];               
+            let quartz = getQuartz(orbId);
+            orbValue += getQuartzModifer(quartz,attribute.toLowerCase());
+        });
+        return orbValue;
+    }
+    //todo get skills call and handle from calculate orbment
+    function getSlotsComplexItem(slots, orbs, type){
+        let orbValue = []; 
+        console.log(slots); //todo remove
+        if(slots)
+        {
+            slots.forEach(function(orb){
+                let orbId = orbs[orb];               
+                let quartz = getQuartz(orbId);
+                let items = getComplexQuartzString(quartz, type);
+                console.log(items); //todo remove
+                if(items && items.length > 0)
+                {
+                    items.forEach(function(tech)
+                    {
+                        orbValue.push(tech);
+                    });
+                }
+            });
+        }
+        return orbValue;
+    }
+
+    function getSlotsComplexTechs(slots, orbs){
+        return getSlotsComplexItem(slots,orbs, 'tech');
+    }
+
+    function getSlotsComplexSkills(slots, orbs){
+        return getSlotsComplexItem(slots,orbs, 'skill');
+    }
+
     function getSkill(name){
         return getLibraryItemByName(skillLibrary, name);
+    }
+
+    function getFlaw(name){
+        return getLibraryItemByName(flawLibrary, name);
     }
 
     function getLibraryItemByName(library,name)
@@ -550,20 +649,10 @@
         getAttrs(slots, function(orbs) {
             let orbPhysValue = 0;
             let orbEngValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("attack"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbPhysValue += quartz.value;
-                }
 
-                if(orbId.startsWith("mind"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbEngValue += quartz.value;
-                }
-            });
+            orbPhysValue += getSlotsModifier(slots, orbs, 'patk');
+            orbEngValue += getSlotsModifier(slots, orbs, 'eatk');
+
             getAttrs(['level', 'str', 'agi', 'spr', 'mnd', 'gut', 'type'], function(values) {
                 let level = parseInt(values.level);
                 let str = parseInt(values.str);
@@ -653,14 +742,8 @@
         }
         getAttrs(slots, function(orbs) {
             let orbValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("hp"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbValue += quartz.value;
-                }
-            });
+            orbValue += getSlotsModifier(slots, orbs, 'hp');
+
             getAttrs(['level', 'str', 'gut', 'type'], function(values) {
                 let level = parseInt(values.level);
                 let str = parseInt(values.str);
@@ -761,14 +844,8 @@
         }
         getAttrs(slots, function(orbs) {
             let orbValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("ep"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbValue += quartz.value;
-                }
-            });
+            orbValue = getSlotsModifier(slots, orbs,'st');
+
             getAttrs(['level', 'mnd', 'spr', 'type'], function(values) {
                 let level = parseInt(values.level);
                 let mnd = parseInt(values.mnd);
@@ -858,14 +935,8 @@
         }
         getAttrs(slots, function(orbs) {
             let orbValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("defense"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbValue += quartz.value;
-                }
-            });
+            orbValue = getSlotsModifier(slots, orbs, 'def');
+            
             getAttrs(['level', 'str', 'gut', 'type'], function(values) {
                 let level = parseInt(values.level);
                 let str = parseInt(values.str);
@@ -951,14 +1022,8 @@
         }
         getAttrs(slots, function(orbs) {
             let orbValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("shield"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbValue += quartz.value;
-                }
-            });
+            orbValue = getSlotsModifier(slots,orbs,'res');
+
             getAttrs(['level', 'spr', 'mnd', 'type'], function(values) {
                 let level = parseInt(values.level);
                 let spr = parseInt(values.spr);
@@ -1045,14 +1110,8 @@
         }
         getAttrs(slots, function(orbs) {
             let orbValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("move"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbValue += quartz.value;
-                }
-            });
+            orbValue = getSlotsModifier(slots,orbs,'move');
+
             getAttrs(['agi'], function(values) {
                 let agi = parseInt(values.agi);
 
@@ -1184,14 +1243,7 @@
         }
         getAttrs(slots, function(orbs) {
             let orbValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("action"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbValue += quartz.value;
-                }
-            });
+            orbValue = getSlotsModifier(slots,orbs,'init');
             
             getAttrs(['dex'], function(values) {
                 let init = parseInt(values.dex);
@@ -1263,22 +1315,9 @@
             slots.push(orbslot);
         }
         getAttrs(slots, function(orbs) {
-            let orbAtkValue = 0;
-            let orbDefValue = 0;
-            slots.forEach(function(orb){
-                let orbId = orbs[orb]; 
-                if(orbId.startsWith("hit"))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbAtkValue += quartz.value;
-                }
+            let orbAtkValue = getSlotsModifier(slots,orbs,'atkroll');
+            let orbDefValue = getSlotsModifier(slots,orbs,'defroll');
 
-                if(orbId.startsWith('evade'))
-                {
-                    let quartz = getQuartz(orbId);
-                    orbDefValue += quartz.value;
-                }
-            });
             getAttrs(['type'], function(values) {
 
                 let atkBonus = 0;
@@ -2924,6 +2963,14 @@
                     setAttrs(summaries);
                 }           
             });
+            let complexArts = getSlotsComplexTechs(slots,values);
+            complexArts.forEach(function(item){
+                if(!techs.includes(item))
+                {
+                    techs.push(item);
+                }
+            })
+
             artsLibrary.forEach(function(art){
                 if(techs.includes(art.id))
                 {
@@ -2935,6 +2982,17 @@
                 }
             });
 
+            let complexSkills = getSlotsComplexSkills(slots,values);
+            complexSkills.forEach(function(item){
+                if(!skills.includes(item))
+                {
+                    skills.push(item);
+                }
+            });
+            console.log('skills');
+            console.log(skills);//todo remove     
+            console.log('complexSkills');
+            console.log(complexSkills);
             setOrbmentSkills(skills);
 
             //setAttrs({orbsummary:summary});
@@ -2942,6 +3000,7 @@
                
     }
 
+    //TODO way to add/remove elemental skills
     function setOrbmentSkills(skills)
     {
         let skillFieldNames =[];
@@ -3486,6 +3545,7 @@
                 <option value="none">Empty</option>
                 <optgroup label="Fire Quartz">
                     <option value="attack1">Attack 1</option>
+                    <option value="fireboltSR">Fire Bolt SR -PROTOTYPE-</option>
                 </optgroup>
                 <optgroup label="Earth Quartz">
                     <option value="defense1">Defense 1</option>
