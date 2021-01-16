@@ -293,7 +293,7 @@
         {type: 'tech', value: 'tear', element: 'water', summary: 'Tear: Grants access to the Art Tear', id:'tear'},
         {type: 'tech', value: 'aquableed', element: 'water', summary: 'Aqua Bleed: Grants access to the Art Aqua Bleed', id: 'aquableed' },
         {type: 'tech', value: 'clockup', element: 'time', summary: 'Clock Up: Grants access to the Art Clock Up', id: 'clockup' },
-        {type: 'complex', value: 'tech-firebolt,patk+6,skill-sizeUp', element: 'fire', summary: 'Fire Bolt SR: Grants Access to the fire bolt skill \n  Increases Physical Attack by 6', id: 'fireboltSR' },
+        {type: 'complex', value: 'tech-firebolt,patk+6,skill-sizeUp,skill-elementalResistance-2-Fire', element: 'fire', summary: 'Fire Bolt SR: Grants Access to the fire bolt skill \n  Increases Physical Attack by 6', id: 'fireboltSR' },
         {type: 'skill', value: 'sizeUp', element: 'mirage', summary: 'Analyze: Grants the skill Size Up', id: 'analyze'}
     ];
 
@@ -342,7 +342,7 @@
             let modifiers = quartz.value.split(',');
             modifiers.forEach(function(mod)
             {
-                if(mod.includes(attribute))
+                if(mod.startsWith(attribute))
                 {
                     let index = mod.indexOf('+');
                     if(index > -1 && index < mod.length)
@@ -366,7 +366,6 @@
     function getComplexQuartzString(quartz,attribute)
     {
         let modValue = [];
-        console.log(quartz); //todo remove
         let modifiers = quartz.value.split(',');
         modifiers.forEach(function(mod)
         {
@@ -396,17 +395,15 @@
         });
         return orbValue;
     }
-    //todo get skills call and handle from calculate orbment
+
     function getSlotsComplexItem(slots, orbs, type){
         let orbValue = []; 
-        console.log(slots); //todo remove
         if(slots)
         {
             slots.forEach(function(orb){
                 let orbId = orbs[orb];               
                 let quartz = getQuartz(orbId);
                 let items = getComplexQuartzString(quartz, type);
-                console.log(items); //todo remove
                 if(items && items.length > 0)
                 {
                     items.forEach(function(tech)
@@ -1526,7 +1523,7 @@
                                             skillMaxLevel = 100; // Custom Skill
                                     }
 
-                                    if(skillLevel > skillMaxLevel && skill.level != 3) {
+                                    if(skillLevel > skillMaxLevel && skill.level != 3 && isExtra != 1) { //allow extra skills to break the level cap? discuss with GM
                                         warning = 'Warning: Level cap for this Skill is ' + skillMaxLevel + '.';
                                     }
 
@@ -2981,7 +2978,7 @@
                     removeArts(art);
                 }
             });
-
+            //todo handle skill levels and notes
             let complexSkills = getSlotsComplexSkills(slots,values);
             complexSkills.forEach(function(item){
                 if(!skills.includes(item))
@@ -2989,10 +2986,6 @@
                     skills.push(item);
                 }
             });
-            console.log('skills');
-            console.log(skills);//todo remove     
-            console.log('complexSkills');
-            console.log(complexSkills);
             setOrbmentSkills(skills);
 
             //setAttrs({orbsummary:summary});
@@ -3010,14 +3003,17 @@
                 skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillname');
                 skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skilllevel');
                 skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillisextra');
+                skillFieldNames.push('repeating_skills_' + sidarray[i] + '_skillnotes');
             }
             getAttrs(skillFieldNames, function(skillValues) {
                 for(let i = 0; i < sidarray.length; i++) {
                     let skillName = skillValues['repeating_skills_' + sidarray[i] + '_skillname'];
                     let isExtra = skillValues['repeating_skills_' + sidarray[i] + '_skillisextra'];
+                    let skillNotes = skillValues['repeating_skills_' + sidarray[i] + '_skillnotes'];
+                    let skillLevel = skillValues['repeating_skills_' + sidarray[i] + '_skilllevel'];
                     if(isExtra == 1)
                     {
-                        if(skills.includes(skillName))
+                        if(skills.includes(skillName)||skills.includes(skillName+'-'+skillLevel)||skills.includes(skillName+'-'+skillLevel+'-'+skillNotes))
                         {
                             foundSkills.push(skillName);
                         }
@@ -3030,16 +3026,21 @@
                 }
 
                 skills.forEach(function(skill) {
+                    let skillbreakdown = skill.split('-');
+                    let sname = skillbreakdown[0];
+                    let slevel = skillbreakdown.length > 1? skillbreakdown[1]:1;
+                    let snotes = skillbreakdown.length > 2? skillbreakdown[2]:'';
+
                     if(!foundSkills.includes(skill))
                     {
-                        addSkill(skill,1,1);
+                        addSkill(sname,slevel,1,snotes); //todo level support
                     }
                 });
             });
         });
     }
 
-    function addSkill(name,level,extra)
+    function addSkill(name,level,extra,notes)
     {
         let rowId = generateRowID();
         let newskill = {};
@@ -3051,6 +3052,12 @@
         {
             newskill['repeating_skills_'+rowId+'_skillnotes']= 'Skill provided by current Orbment settings';
         }
+
+        if(notes != '')
+        {
+            newskill['repeating_skills_'+rowId+'_skillnotes']= notes;
+        }
+
         setAttrs(newskill);
     }
 
