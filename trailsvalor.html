@@ -293,7 +293,7 @@
         {type: 'tech', value: 'tear', element: 'water', summary: 'Tear: Grants access to the Art Tear', id:'tear'},
         {type: 'tech', value: 'aquableed', element: 'water', summary: 'Aqua Bleed: Grants access to the Art Aqua Bleed', id: 'aquableed' },
         {type: 'tech', value: 'clockup', element: 'time', summary: 'Clock Up: Grants access to the Art Clock Up', id: 'clockup' },
-        {type: 'complex', value: 'tech-firebolt,patk+6,skill-sizeUp,skill-elementalResistance-2-Fire', element: 'fire', summary: 'Fire Bolt SR: Grants Access to the fire bolt skill \n  Increases Physical Attack by 6', id: 'fireboltSR' },
+        {type: 'complex', value: 'tech-firebolt,patk+6,skill-sizeUp,skill-elementalResistance-2-Fire', element: 'fire', summary: 'Fire Bolt SR: Grants Access to the fire bolt art. Increases Physical Attack by 6. Grants fire resistance', id: 'fireboltSR' },
         {type: 'skill', value: 'sizeUp', element: 'mirage', summary: 'Analyze: Grants the skill Size Up', id: 'analyze'}
     ];
 
@@ -342,7 +342,7 @@
             let modifiers = quartz.value.split(',');
             modifiers.forEach(function(mod)
             {
-                if(mod.startsWith(attribute))
+                if(mod.startsWith(attribute + '+') || mod.startsWith(attribute + '-'))
                 {
                     let index = mod.indexOf('+');
                     if(index > -1 && index < mod.length)
@@ -3015,7 +3015,7 @@
                     {
                         if(skills.includes(skillName)||skills.includes(skillName+'-'+skillLevel)||skills.includes(skillName+'-'+skillLevel+'-'+skillNotes))
                         {
-                            foundSkills.push(skillName);
+                            foundSkills.push(skillName+'-'+skillLevel+'-'+skillNotes);
                         }
                         else
                         {
@@ -3029,9 +3029,9 @@
                     let skillbreakdown = skill.split('-');
                     let sname = skillbreakdown[0];
                     let slevel = skillbreakdown.length > 1? skillbreakdown[1]:1;
-                    let snotes = skillbreakdown.length > 2? skillbreakdown[2]:'';
+                    let snotes = skillbreakdown.length > 2? skillbreakdown[2]:'Skill provided by current Orbment settings';
 
-                    if(!foundSkills.includes(skill))
+                    if(!foundSkills.includes(sname+'-'+slevel+'-'+snotes))
                     {
                         addSkill(sname,slevel,1,snotes); //todo level support
                     }
