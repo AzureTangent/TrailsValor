@@ -460,6 +460,26 @@ select.sheet-number-select {
     display: none;
 }
 
+
+.sheet-stance-conditional-check {
+    display: none;
+}
+
+.sheet-stance-conditional-block {
+    display: none;
+}
+
+.sheet-stance-conditional-block-inverse {
+    display: inline;
+}
+
+.sheet-stance-conditional-check:checked ~ .sheet-stance-conditional-block {
+    display: inline;
+}
+.sheet-stance-conditional-check:checked ~ .sheet-stance-conditional-block-inverse {
+    display: none;
+}
+
 .sheet-rolltemplate-valor .sheet-outer {
     font-family: "Segoe UI",Frutiger,"Frutiger Linotype","Dejavu Sans","Helvetica Neue",Arial,sans-serif;
     color: #730A18;
@@ -593,4 +613,13 @@ input[value="mirage-quartz"]+select {
 
 .sheet-tab-content.sheet-tab2 > div:not(.sheet-orbment-header) {
     padding-left: 50px;
+}
+
+button[type="action"] {
+    margin-right: 10px;
+    margin-bottom: 3px;
+}
+
+.sheet-currentStance{
+    color:blue;
 }

@@ -1,5 +1,5 @@
 /**
- * VALOR API SCRIPTS v1.5.2
+ * VALOR API SCRIPTS v1.5.4
  * 
  * INSTALLATION INSTRUCTIONS
  * 1. From campaign, go to API Scripts.
@@ -24,8 +24,8 @@ state.rollBehindScreen = false;         // Hide NPC rolls from the players.
 state.autoInitiativeUpdate = true;      // If a character's initiative changes during play, move them accordingly.
 state.autoInitiativeReport = true;      // If a character's initiative changes during play, send a whisper to the GM.
 state.confirmAutoInitiative = true;     // Confirm whether or not to auto-update initiative before each scene.
-state.applyAttackResults = false;       // Allows GM to directly apply attack results with a chat button on a hit. (experimental)
-state.showAttackResults = false;        // Sends messages to the chat when attack results are applied. (experimental)
+state.applyAttackResults = true;       // Allows GM to directly apply attack results with a chat button on a hit. (experimental)
+state.showAttackResults = true;        // Sends messages to the chat when attack results are applied. (experimental)
 state.elementalSystemOn = true;         //checks for elemental vulnerabilities and resistances during damage calculation
 
 // Status Tracker
@@ -465,7 +465,7 @@ function getTechs(charId) {
             } else {
                 techs.push({ id: techId, charId: rawTech.get('_characterid'), element: rawTech.get('current')});
             }
-        }else if(techName.indexOf('custom_cost') > -1) {
+        } else if(techName.indexOf('custom_cost') > -1) {
             let customCost = parseInt(rawTech.get('current'));
             if(customCost != customCost) {
                 customCost = 0;
@@ -535,7 +535,8 @@ function resetValor(charId, skills, flaws) {
 // Resets all bonus fields for all characterse
 function resetBonuses() {
     let bonusList = ['rollbonus', 'atkrollbonus', 'defrollbonus',
-                     'patkbonus', 'eatkbonus', 'defensebonus', 'resistancebonus'];
+                     'patkbonus', 'eatkbonus', 'defensebonus', 
+                     'resistancebonus', 'pShield', 'eShield','dibonus'];
     bonusList.forEach(function(b) {
         let bonuses = filterObjs(function(obj) {
             return obj.get('_type') == 'attribute' &&
@@ -562,7 +563,7 @@ function getTechDamage(tech, charId, crit) {
                m.toLowerCase().indexOf('debilitating') > -1 ||
                m.toLowerCase().indexOf('boosting') > -1;
     });
-
+    
     let stat = tech.newStat ? tech.newStat : tech.stat;
     let atk = getAttrByName(charId, stat + 'Atk');
     
@@ -572,7 +573,15 @@ function getTechDamage(tech, charId, crit) {
     
     let baseAtk = atk;
     let damage = 0;
-    if(tech.core == 'damage' && special) {
+    const actorClass = getAttrByName(charId, 'type');
+    if((actorClass == 'mech' || actorClass == 'masmec') && (tech.core == 'damage' && special)) {
+        damage = (tech.coreLevel + 3) * 40;
+        atk = Math.ceil(atk / 2);
+    } else if((actorClass == 'mech' || actorClass == 'masmec') && (tech.core == 'ultDamage' && !special)) {
+        damage = (tech.coreLevel + 3) * 80;
+    } else if (actorClass == 'mech' || actorClass == 'masmec') {
+        damage = (tech.coreLevel + 3) * 50;
+    }else if(tech.core == 'damage' && special) {
         damage = (tech.coreLevel + 3) * 4;
         atk = Math.ceil(atk / 2);
     } else if(tech.core == 'ultDamage' && !special) {
@@ -591,7 +600,13 @@ function getTechDamage(tech, charId, crit) {
     if(hp.val / hp.max <= 0.4) {
         // HP is critical!
         let crisis = getSkill(charId, 'crisis');
-        if(crisis && crisis.level) {
+        if((actorClass == 'mech' || actorClass == 'masmec') && (crisis && crisis.level)) {
+            let crisisLevel = parseInt(crisis.level);
+            if(crisisLevel != crisisLevel) {
+                crisisLevel = 1;
+            }
+            damage += 30 + crisisLevel * 30;
+        } else if(crisis && crisis.level) {
             let crisisLevel = parseInt(crisis.level);
             if(crisisLevel != crisisLevel) {
                 crisisLevel = 1;
@@ -599,14 +614,22 @@ function getTechDamage(tech, charId, crit) {
             damage += 3 + crisisLevel * 3;
         }
         let berserker = getFlaw(charId, 'berserker');
-        if(berserker) {
+        if((actorClass == 'mech' || actorClass == 'masmec') && (berserker)) {
+            damage += 100;
+        } else if(berserker) {
             damage += 10;
         }
     }
     
     if(tech.empowerAttack) {
         let empowerAttack = getSkill(charId, 'empowerAttack');
-        if(empowerAttack && empowerAttack.level) {
+        if((actorClass == 'mech' || actorClass == 'masmec') && (empowerAttack && empowerAttack.level)) {
+            let empowerAttackLevel = parseInt(empowerAttack.level);
+            if(empowerAttackLevel != empowerAttackLevel) {
+                empowerAttackLevel = 1;
+            }
+            damage += 30 + empowerAttackLevel * 30;
+        } else if(empowerAttack && empowerAttack.level) {
             let empowerAttackLevel = parseInt(empowerAttack.level);
             if(empowerAttackLevel != empowerAttackLevel) {
                 empowerAttackLevel = 1;
@@ -637,6 +660,7 @@ function getTechDescription(tech, charId, suppressDamageDisplay) {
         return '';
     }
     let summary = '';
+    
     switch(tech.core) {
         case 'damage':
         case 'ultDamage':
@@ -659,12 +683,17 @@ function getTechDescription(tech, charId, suppressDamageDisplay) {
                 }
             }
             break;
-        case 'healing':
+        case 'healing': {
+            const actorClass = getAttrByName(charId, 'type');
             let healing;
             let power = tech.stat ? getAttrByName(charId, tech.stat) : 0;
 
             let regen = tech.mods && tech.mods.find(function(m) {
                 return m.toLowerCase().indexOf('continuous r') > -1
+            });
+            
+            let reviving = tech.mods && tech.mods.find(function(m) {
+                return m.toLowerCase().indexOf('reviving') > -1
             });
             
             const healer = getSkill(charId, 'healer');
@@ -675,19 +704,75 @@ function getTechDescription(tech, charId, suppressDamageDisplay) {
                     healerLevel = 1;
                 }
             }
-            
-            const actorClass = getAttrByName(charId, 'type');
+                       
             if(regen) {
                 healing = (tech.coreLevel + 3) * 2 + Math.ceil(power / 2);
                 if(healerLevel) healing += (healerLevel + 1) * 2;
                 if(actorClass == 'flunky' || actorClass == 'soldier') healing = Math.ceil(healing / 2);
+                if(actorClass == 'mech' || actorClass == 'masmec') healing *= 10;
                 summary = 'Restores <span style="color:darkgreen">**' + healing + '**</span> HP per turn';
             } else {
                 healing = (tech.coreLevel + 3) * 3 + Math.ceil(power / 2);
                 if(healerLevel) healing += (healerLevel + 1) * 2;
                 if(actorClass == 'flunky' || actorClass == 'soldier') healing = Math.ceil(healing / 2);
+                if(actorClass == 'mech' || actorClass == 'masmec') healing *= 10;
                 summary = 'Restores <span style="color:darkgreen">**' + healing + '**</span> HP';
+                if(reviving)
+                {
+                    summary += ' (<span style="color:darkgreen">**' + healing * 2 + '**</span> HP to targets with negative HP)';
+                }
             }
+            break;
+        }
+        case 'shield':
+            let shielding;
+            let spower = tech.stat ? getAttrByName(charId, tech.stat) : 0;
+
+            let sregen = tech.mods && tech.mods.find(function(m) {
+                return m.toLowerCase().indexOf('regenerating shield') > -1
+            });
+            
+            let versatile = tech.mods && tech.mods.find(function(m) {
+                return m.toLowerCase().indexOf('versatile shield') > -1
+            });
+
+            let physical = tech.mods && tech.mods.find(function(m) {
+                return m.toLowerCase().indexOf('physical shield') > -1
+            });
+
+            let energy = tech.mods && tech.mods.find(function(m) {
+                return m.toLowerCase().indexOf('energy shield') > -1
+            });
+
+            const actorClass = getAttrByName(charId, 'type');
+            if(sregen) {
+                shielding = (tech.coreLevel + 3) * 2 + Math.ceil(spower / 2);
+                if(actorClass == 'flunky' || actorClass == 'soldier') shielding = Math.ceil(shielding / 2);
+                if(actorClass == 'mech' || actorClass == 'masmec') shielding *= 10;
+                summary = 'Prevents <span style="color:darkgreen">**' + shielding + '**</span> damage per turn';
+            } else {
+                shielding = (tech.coreLevel + 3) * 3 + Math.ceil(spower / 2);
+                if(versatile) shielding = Math.ceil(shielding/2);
+                if(actorClass == 'flunky' || actorClass == 'soldier') shielding = Math.ceil(shielding / 2);
+                if(actorClass == 'mech' || actorClass == 'masmec') shielding *= 10;
+                if(versatile)
+                {
+                    summary = 'Prevents <span style="color:darkgreen">**' + shielding + '**</span> damage';
+                }
+                else if(physical)
+                {
+                    summary = 'Prevents <span style="color:darkgreen">**' + shielding + '**</span> physical damage';
+                }
+                else if(energy)
+                {
+                    summary = 'Prevents <span style="color:darkgreen">**' + shielding + '**</span> energy damage';
+                }
+                else
+                {
+                    summary = 'Prevents <span style="color:darkgreen">**' + shielding + '**</span> damage. Warning: Type of shield not specified via modifier.';
+                }
+            }
+
             break;
         case 'barrier':
             summary = 'Barrier power ' + tech.coreLevel;
@@ -727,6 +812,12 @@ function getTechDescription(tech, charId, suppressDamageDisplay) {
                 mods.push('Throw');
             } else if(mod.indexOf('launch') == 0) {
                 mods.push('Launching');
+            } else if(mod.indexOf('mut') == 0) {
+                mods.push('Muting Strike');
+            } else if(mod.indexOf('seal') == 0) {
+                mods.push('Sealing Strike');
+            } else if(mod.indexOf('delay') == 0) {
+                mods.push('Delaying Strike ' + modLevel);
             } else if(mod.indexOf('disrupt') >= 0) {
                 mods.push('Terrain Disruption');
             } else if(mod.indexOf('repair') >= 0) {
@@ -745,6 +836,10 @@ function getTechDescription(tech, charId, suppressDamageDisplay) {
             }
             if(limit.indexOf('mercy') == 0) {
                 mods.push('Mercy Limit');
+            }
+
+            if(limit.indexOf('charge')== 0){
+                mods.push('Charge Time ' + limitLevel)
             }
         });
     }
@@ -769,7 +864,7 @@ function getTechDescription(tech, charId, suppressDamageDisplay) {
         summary += 'Flaws: ' +  tech.inflictedFlaws;
     }
 
-    if(state.elementalSystemOn && tech.element != 'none')
+    if(state.elementalSystemOn && tech.element && tech.element != 'none')
     {
         if(tech.element.length > 1)
         {
@@ -785,6 +880,12 @@ function getTechDescription(tech, charId, suppressDamageDisplay) {
         let bonusHp = level * 10;
         if(getAttrByName(charId, 'type') == 'master') {
             bonusHp *= 2;
+        }
+        if(getAttrByName(charId, 'type') == 'mech') {
+            bonusHp *= 10;
+        }
+        if(getAttrByName(charId, 'type') == 'masmec') {
+            bonusHp *= 10;
         }
         if(summary.length > 0) {
             summary += '<br />';
@@ -962,8 +1063,7 @@ function getElementalAdjustmentForCharacter(characterId, element)
             }
         });
     }
-    log(element); //TODO
-    log(adjustment);
+    
     return adjustment;
 }
 
@@ -1013,6 +1113,10 @@ function updateValor() {
                 }
                 if(charClass == 'master') {
                     // +1 to hit for Masters
+                    valorRate *= 2;
+                }
+                if(charClass == 'masmec') {
+                    // +1 to hit for Mech Masters
                     valorRate *= 2;
                 }
             }
@@ -1152,9 +1256,122 @@ function updateValue(tokenId, attribute, amount, ratio, absolute) {
     }
 }
 
-function updateValueForCharacter(characterId, attribute, amount, ratio, absolute) {
-    let actor = getObj('character', characterId);
+function reconcileShieldForDamage (targetCharId, damage, type){
+    //SHIELD STUFF
+    let targetChar = getObj('character', targetCharId);
+    let name = targetChar.get('name');
+    let pShield = parseInt(getAttrByName(targetCharId, 'pShield'));
+    let eShield = parseInt(getAttrByName(targetCharId, 'eShield'));
+
+    if(damage > 0 && type == 'physical' &&  pShield > 0 )
+    {
+        if(damage > 0 || pShield > 0){
+            if(pShield >= damage)
+            {
+
+                pShield -= damage;
+                updateValueForCharacter(targetCharId, 'pShield', -damage);
+                sendChat('Valor', `A physical shield absorbed ${damage} damage for ${name}.`);
+                damage = 0;
+            }
+
+            if(damage >= pShield)
+            {
+                damage -= pShield; 
+                updateValueForCharacter(targetCharId, 'pShield', -pShield);
+                sendChat('Valor', `A physical shield absorbed ${pShield} damage for ${name}.`);
+            }
+        }
+    }
+
+    if(damage > 0 && type == 'energy' &&  eShield > 0 )
+    {
+        if(damage > 0 || eShield > 0){
+            if(eShield >= damage)
+            {
+                eShield -= damage;
+                updateValueForCharacter(targetCharId, 'eShield', -damage);
+                sendChat('Valor', `An energy shield absorbed ${damage} damage for ${name}.`);
+                damage = 0;
+            }
+
+            if(damage >= eShield)
+            {
+                damage -= eShield; 
+                updateValueForCharacter(targetCharId, 'eShield', -eShield);
+                sendChat('Valor', `An energy shield absorbed ${eShield} damage for ${name}.`);
+            }         
+        }
+    }
+
+    return damage;
+}
+
+function setToHigherBetweenNewAndCurrentValueForCharacter(characterId, attribute, amount)
+{
+    let actor = getObj('character', characterId);   
+    if(!actor) {
+        log("Couldn't find character for ID " + characterId);
+        return;
+    }
     
+    let attrs = filterObjs(function(obj) {
+        return obj.get('_type') == 'attribute' &&
+            obj.get('characterid') == characterId &&
+            obj.get('name') == attribute;
+    });
+    
+    if(attrs && attrs.length > 0) {
+        let attr = attrs[0];
+        let oldValue = parseInt(attr.get('current'));
+        let maxValue = parseInt(attr.get('max'));
+              
+        if(amount >= oldValue) {
+            attr.set('current', amount);
+        }
+        else
+        {
+            attr.set('current', oldValue);
+        }
+        
+    }
+    else {
+        createObj('attribute', {
+            name: attribute,
+            current: amount,
+            characterid: characterId
+        });
+    }
+}
+
+function updateAttributeForCharacter(characterId, attribute, value) {
+    let actor = getObj('character', characterId);   
+    if(!actor) {
+        log("Couldn't find character for ID " + characterId);
+        return;
+    }
+    
+    let attrs = filterObjs(function(obj) {
+        return obj.get('_type') == 'attribute' &&
+            obj.get('characterid') == characterId &&
+            obj.get('name') == attribute;
+    });
+    
+    if(attrs && attrs.length > 0) {
+        
+        attr.set('current', value);
+    }
+    else {
+        createObj('attribute', {
+            name: attribute,
+            current: value,
+            characterid: characterId
+        });
+    }
+}
+
+function updateValueForCharacter(characterId, attribute, amount, ratio, absolute) {
+    let actor = getObj('character', characterId);   
     if(!actor) {
         log("Couldn't find character for ID " + characterId);
         return;
@@ -1173,7 +1390,7 @@ function updateValueForCharacter(characterId, attribute, amount, ratio, absolute
         if(oldValue != oldValue) {
             oldValue = 0;
         }
-        if(maxValue != maxValue) {
+        if(maxValue != maxValue && !attribute.includes('Shield')) {
             maxValue = 0;
         }
         
@@ -1185,6 +1402,13 @@ function updateValueForCharacter(characterId, attribute, amount, ratio, absolute
         }
         
         attr.set('current', newValue);
+    }
+    else {
+        createObj('attribute', {
+            name: attribute,
+            current: amount,
+            characterid: characterId
+        });
     }
 }
 
@@ -2015,6 +2239,7 @@ on('chat:message', function(msg) {
         let rollStat = tech.stat;
         let rollText = '';
         let hiddenRollText = '';
+        let applyButton = '';
         let targets = 1;
         
         if(tech.core == 'damage' ||
@@ -2130,6 +2355,12 @@ on('chat:message', function(msg) {
             }
         }
         
+        if((tech.core == 'damage' || tech.core == 'ultDamage' || tech.core == 'weaken') && !rollStat) {
+            sendChat('Valor', '/w "' + actor.get('name') + '" Must specify an attribute for this technique.');
+            log('Tech failed on turn ' + round);
+            endEvent('!tech');
+        }
+
         if(targetsList.length > 0) {
             let fullList = (!state.hideNpcTechEffects || !state.rollBehindScreen || actor.get('controlledby')) &&
                 (tech.core == 'damage' || tech.core == 'ultDamage' || tech.core == 'weaken' || tech.core == 'custom') && rollStat != 'none';
@@ -2139,7 +2370,7 @@ on('chat:message', function(msg) {
             if(fullList) {
                 rollText += ':';
             } else {
-                if(tech.core == 'boost' || tech.core == 'ultTransform' || tech.core == 'healing') {
+                if(tech.core == 'boost' || tech.core == 'ultTransform' || tech.core == 'healing' || tech.core == 'shield') {
                     rollText += targetsList.length == 1 ? 'Target' : 'Targets';
                 } else {
                     rollText += ' VS';
@@ -2181,7 +2412,7 @@ on('chat:message', function(msg) {
                 // Get damage
                 let damage = getTechDamage(tech, actor.get('_id'), false);
                 let critDamage = getTechDamage(tech, actor.get('_id'), true);
-                
+                let type = '';
                 // Get def/res
                 let defRes = 0;
                 let defResStat = tech.newStat ? tech.newStat : tech.stat;
@@ -2208,12 +2439,15 @@ on('chat:message', function(msg) {
                             defRes += bonus;
                         }
                     }
+                   
+                }
 
-                    if(state.elementalSystemOn && element != 'none')
-                    {
-                        defRes += getElementalAdjustmentForCharacter(targetCharId,element);
-                    }
-                }               
+                if(state.elementalSystemOn && element != 'none')
+                {
+                    defRes += getElementalAdjustmentForCharacter(targetCharId,element);
+                }
+
+                
                 
                 if(fullList) {
                     rollText += '<br />VS ' + targetName + ': ';
@@ -2247,7 +2481,7 @@ on('chat:message', function(msg) {
                             }
                             
                             rollText += ', Reposition ' + distance;
-                        }                       
+                        }
                     }
                     
                 } else {
@@ -2302,8 +2536,27 @@ on('chat:message', function(msg) {
                         }) : null;
                         
                         log(tech);
-                        effectPhrase = ` -e ¶${tech.name}¶ ${temporaryLimit ? 2 : 3}`;
+                        effectPhrase = ` -e &quot;${tech.name}&quot; ${temporaryLimit ? 2 : 3}`;
                         log(effectPhrase);
+                    }
+
+                    if(tech.mods && tech.mods.find(function(m) {
+                        return m.toLowerCase().indexOf('piercing') > -1
+                    })){
+                        type = 'piercing';
+                    }
+                    else if (defResStat == 'str' || defResStat == 'agi'){
+                        type = 'physical';
+                    } else {
+                        type = 'energy';
+                    }
+
+                    let pShield = parseInt(getAttrByName(targetCharId, 'pShield'));
+                    let eShield = parseInt(getAttrByName(targetCharId, 'eShield'));
+                    let protected = false;
+                    if(type != 'piercing' && ((type == 'physical' && pShield > 0)||(type == 'energy' && eShield > 0)))
+                    {
+                        protected = true;
                     }
                     
                     if(tech.core == 'damage' || tech.core == 'ultDamage') {
@@ -2312,17 +2565,25 @@ on('chat:message', function(msg) {
                         }
                         // Create the Hit button
                         let finalDamage = Math.max(0, damage - defRes);
-                        if(finalDamage > 0) {
+                        if(finalDamage > 0 && protected) {
+                            hiddenRollText += ` <a href="${applyCommand} -d ${finalDamage}${effectPhrase} -t ${type}" style="padding:3px">Hit</a>`;
+                        } else if(finalDamage > 0)
+                        {
                             hiddenRollText += ` <a href="${applyCommand} -d ${finalDamage}${effectPhrase}" style="padding:3px">Hit</a>`;
                         }
+                        
                         // Create the Crit button
                         finalDamage = Math.max(0, critDamage - defRes);
-                        if(finalDamage > 0) {
+                        if(finalDamage > 0 && protected) {
+                            hiddenRollText += ` <a href="${applyCommand} -d ${finalDamage}${effectPhrase} -t ${type}" style="padding:3px">Crit</a>`;
+                        } else if(finalDamage > 0) {
                             hiddenRollText += ` <a href="${applyCommand} -d ${finalDamage}${effectPhrase}" style="padding:3px">Crit</a>`;
                         }
                         // Create the DI button
                         finalDamage = parseInt(getAttrByName(actor.get('_id'), 'di'));
-                        if(finalDamage > 0) {
+                        if(finalDamage > 0 && protected) {
+                            hiddenRollText += ` <a href="${applyCommand} -d ${finalDamage} -t ${type}" style="padding:3px">DI</a>`;
+                        } else if(finalDamage > 0) {
                             hiddenRollText += ` <a href="${applyCommand} -d ${finalDamage}" style="padding:3px">DI</a>`;
                         }
                     }
@@ -2391,6 +2652,12 @@ on('chat:message', function(msg) {
                     }
                     
                     hpCost += healthLimitLevel * 5;
+                    if(getAttrByName(actor.get('_id'), 'type') == 'mech') {
+                        hpCost *= 10;
+                    }
+                    if(getAttrByName(actor.get('_id'), 'type') == 'masmec') {
+                        hpCost *= 10;
+                    }
                 }
                 
                 let ultimateHealthLimit = tech.limits.find(function(l) {
@@ -2482,6 +2749,11 @@ on('chat:message', function(msg) {
                     if(getAttrByName(actor.get('_id'), 'type') == 'master') {
                         hpGain *= 2;
                     }
+
+                    if(getAttrByName(actor.get('_id'), 'type') == 'mech' || getAttrByName(actor.get('_id'), 'type') == 'masmec' ) {
+                        hpGain *= 10;
+                    }
+
                     // Directly restore HP
                     charIds.forEach(function(charId) {
                         updateValueForCharacter(charId, 'hp', hpGain);
@@ -2510,6 +2782,9 @@ on('chat:message', function(msg) {
                     let regen = tech.mods && tech.mods.find(function(m) {
                         return m.toLowerCase().indexOf('continuous r') > -1;
                     });
+                    let reviving = tech.mods && tech.mods.find(function(m) {
+                        return m.toLowerCase().indexOf('reviving') > -1;
+                    });
                     let power = tech.stat ? getAttrByName(actor.get('_id'), tech.stat) : 0;
                     if(regen) {
                         hpGain = (tech.coreLevel + 3) * 2 + Math.ceil(power / 2);
@@ -2530,6 +2805,8 @@ on('chat:message', function(msg) {
                     }
                     
                     if(actorClass == 'flunky' || actorClass == 'soldier') hpGain = Math.ceil(hpGain / 2);
+                    
+                    if(actorClass == 'mech' || actorClass == 'masmec') hpGain *= 10;
                     
                     if(regen) {
                         // Add regen effect to character
@@ -2578,6 +2855,14 @@ on('chat:message', function(msg) {
                     } else {
                         // Directly restore HP
                         charIds.forEach(function(charId) {
+                            if(reviving)
+                            {
+                                let currentHealth = getAttrByName(charId, 'hp')
+                                if(currentHealth < 0)
+                                {
+                                    hpGain *= 2;
+                                }
+                            }
                             let aggravatedWounds = getFlaw(charId, 'aggravatedWounds');
                             if(aggravatedWounds && tech.core == 'healing') {
                                 updateValueForCharacter(charId, 'hp', Math.ceil(hpGain));
@@ -2588,6 +2873,63 @@ on('chat:message', function(msg) {
                     }
                 }
                 
+            }
+            if(tech.core == 'shield')
+            {
+                let charIds = [];
+                
+                if(targetsList.length > 0) {
+                    targetsList.forEach(function(target) {
+                        charIds.push(target.get('represents'));
+                    });
+                } else {
+                    charIds.push(actor.get('_id'));
+                }
+                
+                let hpGain = 0;
+                let power = tech.stat ? getAttrByName(actor.get('_id'), tech.stat) : 0;
+                if(state.houseRulesEnabled) {
+                    hpGain = (tech.coreLevel + 3) * 3 + Math.ceil(power / 2);
+                } else {
+                    hpGain = (tech.coreLevel + 3) * 4 + power;
+                }
+                
+                let vers = tech.mods && tech.mods.find(function(m) {
+                    return m.toLowerCase().indexOf('versatile shield') > -1;
+                });
+
+                let phys = tech.mods && tech.mods.find(function(m) {
+                    return m.toLowerCase().indexOf('physical shield') > -1;
+                });
+
+                let eng = tech.mods && tech.mods.find(function(m) {
+                    return m.toLowerCase().indexOf('energy shield') > -1;
+                });
+
+                if(vers) hpGain = Math.ceil(hpGain/2);
+                if(actorClass == 'flunky' || actorClass == 'soldier') hpGain = Math.ceil(hpGain / 2);           
+                if(actorClass == 'mech' || actorClass == 'masmec') hpGain *= 10;
+
+                charIds.forEach(function(charId) {
+
+                    if(vers)
+                    {
+                        setToHigherBetweenNewAndCurrentValueForCharacter(charId, 'eShield', hpGain);
+                        setToHigherBetweenNewAndCurrentValueForCharacter(charId, 'pShield', hpGain);
+                    }
+
+                    if(phys)
+                    {
+                        setToHigherBetweenNewAndCurrentValueForCharacter(charId, 'pShield', hpGain);
+                    }
+
+                    if(eng)
+                    {
+                        setToHigherBetweenNewAndCurrentValueForCharacter(charId, 'eShield', hpGain);
+                    }
+
+                    
+                });
             }
         }
         
@@ -2853,7 +3195,7 @@ on('chat:message', function(msg) {
         startEvent('!tech-apply');
         
         // Get params
-        let split = msg.content.match(/(¶.*?¶)|(\S+)/g);
+        let split = msg.content.match(/(".*?")|(\S+)/g);
         if(split.length < 2) {
             log('Not enough arguments.');
             return;
@@ -2862,31 +3204,52 @@ on('chat:message', function(msg) {
         const tokenId = split[1];
         let damage = 0;
         let effect = {};
-        
+        let type = '';
         let paramId = 2;
         while(paramId < split.length) {
             switch(split[paramId]) {
                 case '-d':
                     // Apply is inflicting damage
                     damage = parseInt(split[paramId + 1]);
-                    paramId++;
+                    paramId += 2;
                     break;
                 case '-e':
                     // Apply is creating an effect
                     effect.name = split[paramId + 1];
-                    if(effect.name && effect.name[0] == '¶') {
+                    if(effect.name && effect.name[0] == '"') 
                         effect.name = effect.name.substring(1, effect.name.length - 1);
-                    }
                     effect.duration = split[paramId + 2];
-                    paramId += 2;
+                    paramId += 3;
                     break;
+                case '-t':
+                    type = split[paramId + 1];
+                    paramId += 2
                 default:
                     log(`Unrecognized parameter: ${split[paramId]}`);
+                    paramId++;
                     break;
             }
-            paramId++;
         }
-        
+
+        let token;
+        if(tokenId) {
+            let selectedToken = getObj('graphic', tokenId);
+            if(selectedToken.get('represents')) {
+                token = selectedToken;
+            }
+        }
+     
+        if(!token) {
+            sendChat('Valor', '/w gm No selected token is linked to a character sheet.');
+            return;
+        }
+
+        if(type != '' && type != 'piercing')
+        {
+            //SHIELD STUFF
+            damage = reconcileShieldForDamage(token.get('represents'), damage, type);
+        }
+     
         if(damage > 0) {
             // Time to apply damage
             updateValue(tokenId, 'hp', -damage);
@@ -2895,7 +3258,7 @@ on('chat:message', function(msg) {
         if(effect.name) {
             // Time to create an effect
             let turnOrder = JSON.parse(Campaign().get('turnorder'));
-            addEffect(turnOrder, tokenId, effect.name, effect.duration);
+            effect.result = addEffect(turnOrder, tokenId, effect.name, effect.duration);    
         }
         
         if(state.showAttackResults) {
@@ -2906,7 +3269,7 @@ on('chat:message', function(msg) {
                 if(damage > 0) {
                     messages.push(`${tokenName} took ${damage} damage.`);
                 }
-                if(effect.name) {
+                if(effect.name && effect.result) {
                     messages.push(`${tokenName} gained a new weaken effect.`);
                 }
                 
@@ -2986,11 +3349,12 @@ function addEffect(turnOrder, id, effectName, duration) {
                 let newTurnOrder = turnOrder.slice(0, i + 1).concat([effect]).concat(turnOrder.slice(i + 1));
                 Campaign().set('turnorder', JSON.stringify(newTurnOrder));
                 log('Effect ' + effectName + ' added to Turn Tracker.');
-                return;
+                return true;
             }
         }
     }
     log('Actor not found on Turn Tracker.');
+    return false;
 }
 
 // !rest command
@@ -3110,13 +3474,13 @@ on('chat:message', function(msg) {
             
             hpAttr.set('current', newValue);
         });
-        
+              
         // Update every ST attribute
         let stAttrs = filterObjs(function(obj) {
             return obj.get('_type') == 'attribute' &&
                 obj.get('name') == 'st';
         });
-        
+
         stAttrs.forEach(function(stAttr) {
             let oldValue = parseInt(stAttr.get('current'));
             let maxValue = parseInt(stAttr.get('max'));
@@ -3168,7 +3532,7 @@ on('chat:message', function(msg) {
             let tokenId = token.get('_id');
             updateValue(tokenId, 'hp', 0.2, true);
             updateValue(tokenId, 'st', 0.2, true);
-            updateValue(tokenId, 'valor', 0, false, true);
+            updateValue(tokenId, 'valor', 0, false, true);         
         });
         
         state.techData = {};
@@ -3425,7 +3789,8 @@ on('chat:message', function(msg) {
                     turnOrder.push({
                         id: token.get('_id'),
                         pr: init,
-                        custom: ''
+                        custom: '',
+                        _pageid: page
                     });
                     message += '<tr><td>' + actorName + ' - **' + init + '**</td></tr>';
                 }
@@ -3439,7 +3804,8 @@ on('chat:message', function(msg) {
             id: "-1",
             pr: 1,
             custom: 'Round',
-            formula: "1"
+            formula: "1",
+            _pageid: page
         });
         Campaign().set('turnorder', JSON.stringify(turnOrder));
         
