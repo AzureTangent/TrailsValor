@@ -7,87 +7,78 @@
 	</defs>
 	<defs>
 		<linearGradient id="pulse-1" gradientUnits="userSpaceOnUse" x1="339.15290792337623" y1="232.52422237239824" x2="308.13566629537377" y2="296.93219852603926">
-			<stop offset="0.5280992376158341" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.6780992376158341" stop-color="black"></stop>
-			<stop offset="0.8280992376158341" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="339.15290792337623" y1="232.52422237239824" x2="308.13566629537377" y2="296.93219852603926" class="energy-line-highlight" data-offset="0.6780992376158341" data-dir="1" stroke="url(#pulse-1)"></line>
 	<defs>
 		<linearGradient id="pulse-2" gradientUnits="userSpaceOnUse" x1="339.15290792337623" y1="232.52422237239824" x2="308.13566629537377" y2="296.93219852603926">
-			<stop offset="0.5291049369917925" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.6791049369917925" stop-color="rgb(110, 86, 98)"></stop>
-			<stop offset="0.8291049369917926" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="339.15290792337623" y1="232.52422237239824" x2="308.13566629537377" y2="296.93219852603926" class="energy-line-highlight" data-offset="0.6791049369917925" data-dir="1" stroke="url(#pulse-2)"></line>
 	<defs>
 		<linearGradient id="pulse-3" gradientUnits="userSpaceOnUse" x1="339.15290792337623" y1="232.52422237239824" x2="308.13566629537377" y2="296.93219852603926">
-			<stop offset="0" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.046887765949200244" stop-color="rgb(110, 86, 98)"></stop>
-			<stop offset="0.19688776594920024" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="339.15290792337623" y1="232.52422237239824" x2="308.13566629537377" y2="296.93219852603926" class="energy-line-highlight" data-offset="0.046887765949200244" data-dir="1" stroke="url(#pulse-3)"></line>
 	<line x1="339.15290792337623" y1="232.52422237239824" x2="308.13566629537377" y2="296.93219852603926" stroke="url(#base-0)" class="energy-line"></line>
 	<defs>
 		<linearGradient id="base-4" gradientUnits="userSpaceOnUse" x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171">
-			<stop offset="0%" stop-color="#2580ad"></stop>
-			<stop offset="100%" stop-color="#34973b"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<defs>
 		<linearGradient id="pulse-5" gradientUnits="userSpaceOnUse" x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171">
-			<stop offset="0.35121522375178105" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.5012152237517811" stop-color="rgb(44, 139, 116)"></stop>
-			<stop offset="0.6512152237517811" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171" class="energy-line-highlight" data-offset="0.5012152237517811" data-dir="1" stroke="url(#pulse-5)"></line>
 	<defs>
 		<linearGradient id="pulse-6" gradientUnits="userSpaceOnUse" x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171">
-			<stop offset="0.12718673319579085" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.27718673319579085" stop-color="rgb(44, 139, 116)"></stop>
-			<stop offset="0.4271867331957908" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171" class="energy-line-highlight" data-offset="0.27718673319579085" data-dir="1" stroke="url(#pulse-6)"></line>
 	<defs>
 		<linearGradient id="pulse-7" gradientUnits="userSpaceOnUse" x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171">
-			<stop offset="0.7667668215806746" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.9167668215806746" stop-color="rgb(44, 139, 116)"></stop>
-			<stop offset="1" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171" class="energy-line-highlight" data-offset="0.9167668215806746" data-dir="1" stroke="url(#pulse-7)"></line>
 	<line x1="272.91537546834456" y1="325.01944010326105" x2="203.22027516642103" y2="340.9268794768171" stroke="url(#base-4)" class="energy-line"></line>
 	<defs>
 		<linearGradient id="base-8" gradientUnits="userSpaceOnUse" x1="189.69416989782695" y1="323.965676985945" x2="286.4414807369387" y2="123.0678160560472">
-			<stop offset="0%" stop-color="#34973b"></stop>
-			<stop offset="100%" stop-color="#423853"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<defs>
 		<linearGradient id="pulse-9" gradientUnits="userSpaceOnUse" x1="189.69416989782695" y1="323.965676985945" x2="286.4414807369387" y2="123.0678160560472">
-			<stop offset="0.612875691090362" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.762875691090362" stop-color="rgb(59, 103, 71)"></stop>
-			<stop offset="0.912875691090362" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="189.69416989782695" y1="323.965676985945" x2="286.4414807369387" y2="123.0678160560472" class="energy-line-highlight" data-offset="0.762875691090362" data-dir="1" stroke="url(#pulse-9)"></line>
 	<defs>
 		<linearGradient id="pulse-10" gradientUnits="userSpaceOnUse" x1="189.69416989782695" y1="323.965676985945" x2="286.4414807369387" y2="123.0678160560472">
-			<stop offset="0.5294119878133324" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.6794119878133325" stop-color="rgb(59, 103, 71)"></stop>
-			<stop offset="0.8294119878133325" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="189.69416989782695" y1="323.965676985945" x2="286.4414807369387" y2="123.0678160560472" class="energy-line-highlight" data-offset="0.6794119878133325" data-dir="1" stroke="url(#pulse-10)"></line>
 	<defs>
 		<linearGradient id="pulse-11" gradientUnits="userSpaceOnUse" x1="189.69416989782695" y1="323.965676985945" x2="286.4414807369387" y2="123.0678160560472">
-			<stop offset="0.19132751388961514" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.34132751388961513" stop-color="rgb(59, 103, 71)"></stop>
-			<stop offset="0.49132751388961515" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="189.69416989782695" y1="323.965676985945" x2="286.4414807369387" y2="123.0678160560472" class="energy-line-highlight" data-offset="0.34132751388961513" data-dir="1" stroke="url(#pulse-11)"></line>
@@ -100,87 +91,78 @@
 	</defs>
 	<defs>
 		<linearGradient id="pulse-13" gradientUnits="userSpaceOnUse" x1="272.91537631983925" y1="94.98057142488457" x2="203.2202743149264" y2="79.0731204391291">
-			<stop offset="0.22505757471541918" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.3750575747154192" stop-color="rgb(127, 129, 145)"></stop>
-			<stop offset="0.5250575747154191" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="272.91537631983925" y1="94.98057142488457" x2="203.2202743149264" y2="79.0731204391291" class="energy-line-highlight" data-offset="0.3750575747154192" data-dir="1" stroke="url(#pulse-13)"></line>
 	<defs>
 		<linearGradient id="pulse-14" gradientUnits="userSpaceOnUse" x1="272.91537631983925" y1="94.98057142488457" x2="203.2202743149264" y2="79.0731204391291">
-			<stop offset="0.6439656719392485" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.7939656719392485" stop-color="rgb(127, 129, 145)"></stop>
-			<stop offset="0.9439656719392485" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="272.91537631983925" y1="94.98057142488457" x2="203.2202743149264" y2="79.0731204391291" class="energy-line-highlight" data-offset="0.7939656719392485" data-dir="1" stroke="url(#pulse-14)"></line>
 	<defs>
 		<linearGradient id="pulse-15" gradientUnits="userSpaceOnUse" x1="272.91537631983925" y1="94.98057142488457" x2="203.2202743149264" y2="79.0731204391291">
-			<stop offset="0.09867151623721493" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.24867151623721492" stop-color="rgb(127, 129, 145)"></stop>
-			<stop offset="0.3986715162372149" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="272.91537631983925" y1="94.98057142488457" x2="203.2202743149264" y2="79.0731204391291" class="energy-line-highlight" data-offset="0.24867151623721492" data-dir="1" stroke="url(#pulse-15)"></line>
 	<line x1="272.91537631983925" y1="94.98057142488457" x2="203.2202743149264" y2="79.0731204391291" stroke="url(#base-12)" class="energy-line"></line>
 	<defs>
 		<linearGradient id="base-16" gradientUnits="userSpaceOnUse" x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226">
-			<stop offset="0%" stop-color="#bccbcf"></stop>
-			<stop offset="100%" stop-color="#c5a532"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<defs>
 		<linearGradient id="pulse-17" gradientUnits="userSpaceOnUse" x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226">
-			<stop offset="0.017351449348702086" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.16735144934870208" stop-color="rgb(192, 184, 128)"></stop>
-			<stop offset="0.3173514493487021" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226" class="energy-line-highlight" data-offset="0.16735144934870208" data-dir="1" stroke="url(#pulse-17)"></line>
 	<defs>
 		<linearGradient id="pulse-18" gradientUnits="userSpaceOnUse" x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226">
-			<stop offset="0.5986059474594115" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.7486059474594116" stop-color="rgb(192, 184, 128)"></stop>
-			<stop offset="0.8986059474594116" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226" class="energy-line-highlight" data-offset="0.7486059474594116" data-dir="1" stroke="url(#pulse-18)"></line>
 	<defs>
 		<linearGradient id="pulse-19" gradientUnits="userSpaceOnUse" x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226">
-			<stop offset="0.3464564837286018" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.4964564837286018" stop-color="rgb(192, 184, 128)"></stop>
-			<stop offset="0.6464564837286018" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226" class="energy-line-highlight" data-offset="0.4964564837286018" data-dir="1" stroke="url(#pulse-19)"></line>
 	<line x1="159.30128808072675" y1="89.09734095310134" x2="103.4101415152205" y2="133.66903554226" stroke="url(#base-16)" class="energy-line"></line>
 	<defs>
 		<linearGradient id="base-20" gradientUnits="userSpaceOnUse" x1="83.86435317993164" y1="174.25627899169922" x2="83.86435317993164" y2="245.74371337890625">
-			<stop offset="0%" stop-color="#c5a532"></stop>
-			<stop offset="100%" stop-color="#7f5321"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<defs>
 		<linearGradient id="pulse-21" gradientUnits="userSpaceOnUse" x1="83.86435317993164" y1="174.25627899169922" x2="83.86435317993164" y2="245.74371337890625">
-			<stop offset="0.42429991570158354" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.5742999157015836" stop-color="rgb(162, 124, 41)"></stop>
-			<stop offset="0.7242999157015836" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="83.86435317993164" y1="174.25627899169922" x2="83.86435317993164" y2="245.74371337890625" class="energy-line-highlight" data-offset="0.5742999157015836" data-dir="1" stroke="url(#pulse-21)"></line>
 	<defs>
 		<linearGradient id="pulse-22" gradientUnits="userSpaceOnUse" x1="83.86435317993164" y1="174.25627899169922" x2="83.86435317993164" y2="245.74371337890625">
-			<stop offset="0.7611265948647511" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.9111265948647511" stop-color="rgb(162, 124, 41)"></stop>
-			<stop offset="1" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="83.86435317993164" y1="174.25627899169922" x2="83.86435317993164" y2="245.74371337890625" class="energy-line-highlight" data-offset="0.9111265948647511" data-dir="1" stroke="url(#pulse-22)"></line>
 	<defs>
 		<linearGradient id="pulse-23" gradientUnits="userSpaceOnUse" x1="83.86435317993164" y1="174.25627899169922" x2="83.86435317993164" y2="245.74371337890625">
-			<stop offset="0.026133851315004647" stop-color="rgba(255,255,255,0)"></stop>
-			<stop offset="0.17613385131500464" stop-color="rgb(162, 124, 41)"></stop>
-			<stop offset="0.3261338513150046" stop-color="rgba(255,255,255,0)"></stop>
+			<stop offset="0%" stop-color="grey"></stop>
+			<stop offset="100%" stop-color="silver"></stop>
 		</linearGradient>
 	</defs>
 	<line x1="83.86435317993164" y1="174.25627899169922" x2="83.86435317993164" y2="245.74371337890625" class="energy-line-highlight" data-offset="0.17613385131500464" data-dir="1" stroke="url(#pulse-23)"></line>
