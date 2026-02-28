@@ -626,7 +626,7 @@ button[type="action"] {
 
 .sheet-pentagram{
   --slot-size: 50px;
-  --radius: 140px;
+  --radius: 100px;
   --fire:   #b72d18; 
   --water:  #2580ad;   
   --wind:   #34973b;  
@@ -674,8 +674,8 @@ button[type="action"] {
 
 .sheet-orbment {
   position: relative;
-  width: 420px;
-  height: 420px;
+  width: 300px;
+  height: 300px;
   border-radius: 24px;
   background:
     radial-gradient(circle at center, #1b2238 0, #050711 55%, #000 100%);

@@ -594,7 +594,8 @@
     }
     
     let quartzImageLibrary = [
-        {id: 'none', image: ''},
+        {id: 'none', image: ' '},
+        {id: 'locked', image: 'locked'},
         {id: 'time', image: 'time-quartz'},
         {id: 'space', image: 'space-quartz'},
         {id: 'mirage', image: 'mirage-quartz'},
@@ -3674,6 +3675,11 @@
                             {
                                 values[orbslot] = 'none'
                                 setAttrs(values);
+                                images[orbslot + 'Image'] = '';
+                                setAttrs(images);
+                                summaries[orbslot+"summary"] = quartz.summary;
+                                setAttrs(summaries);
+                                
                             }
                             else
                             {         
@@ -3694,6 +3700,20 @@
                                 {
                                     skills.push(quartz.value);
                                 }
+                                else if(quartz.type == 'none')
+                                {
+                                    values[orbslot] = 'none'
+                                    images[orbslot + 'Image'] = '';
+                                    setAttrs(images);
+                                    setAttrs(values);
+                                }
+                                else if(quartz.type == 'locked')
+                                {
+                                    values[orbslot] = 'locked'
+                                    images[orbslot + 'Image'] = 'locked';
+                                    setAttrs(images);
+                                    setAttrs(values);
+                                }
                             }
                         }
                         else
@@ -3712,6 +3732,7 @@
                         let summaries = {};
                         summaries[orbslot+"summary"] = '';
                         setAttrs(summaries);
+                        
                     }           
                 });
                 let complexArts = getSlotsComplexTechs(slots,values);
@@ -4527,22 +4548,6 @@
                 <div class="orbment">
                     <div class="slot-anchor">
                     <div class="quartz-slot">
-                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot4Image">
-                        <div class="tech-ring"></div>
-                        <div class="tech-pulse"></div>
-                        <div class="quartz-core"></div>
-                    </div>
-                    </div>
-                    <div class="slot-anchor">
-                    <div class="quartz-slot">
-                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot5Image">
-                        <div class="tech-ring"></div>
-                        <div class="tech-pulse"></div>
-                        <div class="quartz-core"></div>
-                    </div>
-                    </div>
-                    <div class="slot-anchor">
-                    <div class="quartz-slot">
                         <input type="hidden" class="sheet-tech-field" name="attr_orbslot6Image">
                         <div class="tech-ring"></div>
                         <div class="tech-pulse"></div>
@@ -4551,15 +4556,7 @@
                     </div>
                     <div class="slot-anchor">
                     <div class="quartz-slot">
-                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot7Image">
-                        <div class="tech-ring"></div>
-                        <div class="tech-pulse"></div>
-                        <div class="quartz-core"></div>
-                    </div>
-                    </div>
-                    <div class="slot-anchor">
-                    <div class="quartz-slot">
-                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot1Image">
+                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot4Image">
                         <div class="tech-ring"></div>
                         <div class="tech-pulse"></div>
                         <div class="quartz-core"></div>
@@ -4575,7 +4572,31 @@
                     </div>
                     <div class="slot-anchor">
                     <div class="quartz-slot">
+                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot7Image">
+                        <div class="tech-ring"></div>
+                        <div class="tech-pulse"></div>
+                        <div class="quartz-core"></div>
+                    </div>
+                    </div>
+                    <div class="slot-anchor">
+                    <div class="quartz-slot">
+                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot5Image">
+                        <div class="tech-ring"></div>
+                        <div class="tech-pulse"></div>
+                        <div class="quartz-core"></div>
+                    </div>
+                    </div>
+                    <div class="slot-anchor">
+                    <div class="quartz-slot">
                         <input type="hidden" class="sheet-tech-field" name="attr_orbslot3Image">
+                        <div class="tech-ring"></div>
+                        <div class="tech-pulse"></div>
+                        <div class="quartz-core"></div>
+                    </div>
+                    </div>
+                    <div class="slot-anchor">
+                    <div class="quartz-slot">
+                        <input type="hidden" class="sheet-tech-field" name="attr_orbslot1Image">
                         <div class="tech-ring"></div>
                         <div class="tech-pulse"></div>
                         <div class="quartz-core"></div>
