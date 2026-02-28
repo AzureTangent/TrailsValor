@@ -176,7 +176,7 @@ function getSkills(charId) {
         } else if(skillName.indexOf('skillnotes') > -1) {
             let notes = rawSkill.get('current');
                 // It's not NaN, so assign skill level
-            if(notes) {
+            if(notes && oldSkill) {
                 oldSkill.notes = notes;
             } else {
                 skills.push({ id: skillId, notes: notes });
